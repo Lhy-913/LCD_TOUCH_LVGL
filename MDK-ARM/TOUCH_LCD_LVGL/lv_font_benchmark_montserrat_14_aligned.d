@@ -1,0 +1,1 @@
+touch_lcd_lvgl\lv_font_benchmark_montserrat_14_aligned.o: ../user_lvgl/lvgl/demos/benchmark/assets/lv_font_benchmark_montserrat_14_aligned.c
