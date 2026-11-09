@@ -1,0 +1,210 @@
+{
+	"configurations" : 
+	[
+		{
+			"abstractTargets" : [],
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1
+					],
+					"jsonFile" : "directory-.-Debug-b5805d5c08fd3d92def4.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.15.6"
+					},
+					"projectIndex" : 0,
+					"source" : "."
+				},
+				{
+					"build" : "Source",
+					"childIndexes" : 
+					[
+						2,
+						3,
+						4,
+						5,
+						6,
+						7,
+						8,
+						9,
+						10,
+						11
+					],
+					"jsonFile" : "directory-Source-Debug-663546198ae9eddfd5ce.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.15.6"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "Source",
+					"targetIndexes" : 
+					[
+						0
+					]
+				},
+				{
+					"build" : "Source/BasicMathFunctions",
+					"jsonFile" : "directory-Source.BasicMathFunctions-Debug-4b127ed235e05ad4724c.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.15.6"
+					},
+					"parentIndex" : 1,
+					"projectIndex" : 0,
+					"source" : "Source/BasicMathFunctions"
+				},
+				{
+					"build" : "Source/ConcatenationFunctions",
+					"jsonFile" : "directory-Source.ConcatenationFunctions-Debug-e48ed12bde8946d3de61.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.15.6"
+					},
+					"parentIndex" : 1,
+					"projectIndex" : 0,
+					"source" : "Source/ConcatenationFunctions"
+				},
+				{
+					"build" : "Source/FullyConnectedFunctions",
+					"jsonFile" : "directory-Source.FullyConnectedFunctions-Debug-e3aca9dd7f7766a79837.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.15.6"
+					},
+					"parentIndex" : 1,
+					"projectIndex" : 0,
+					"source" : "Source/FullyConnectedFunctions"
+				},
+				{
+					"build" : "Source/ConvolutionFunctions",
+					"jsonFile" : "directory-Source.ConvolutionFunctions-Debug-42aadde9c34b9f0e77a4.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.15.6"
+					},
+					"parentIndex" : 1,
+					"projectIndex" : 0,
+					"source" : "Source/ConvolutionFunctions"
+				},
+				{
+					"build" : "Source/ActivationFunctions",
+					"jsonFile" : "directory-Source.ActivationFunctions-Debug-ed357b962d6dcd144555.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.15.6"
+					},
+					"parentIndex" : 1,
+					"projectIndex" : 0,
+					"source" : "Source/ActivationFunctions"
+				},
+				{
+					"build" : "Source/PoolingFunctions",
+					"jsonFile" : "directory-Source.PoolingFunctions-Debug-725e67a9a30451b0a19b.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.15.6"
+					},
+					"parentIndex" : 1,
+					"projectIndex" : 0,
+					"source" : "Source/PoolingFunctions"
+				},
+				{
+					"build" : "Source/SoftmaxFunctions",
+					"jsonFile" : "directory-Source.SoftmaxFunctions-Debug-1e1c84ac2b64e578b755.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.15.6"
+					},
+					"parentIndex" : 1,
+					"projectIndex" : 0,
+					"source" : "Source/SoftmaxFunctions"
+				},
+				{
+					"build" : "Source/SVDFunctions",
+					"jsonFile" : "directory-Source.SVDFunctions-Debug-1621319d69655d275f28.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.15.6"
+					},
+					"parentIndex" : 1,
+					"projectIndex" : 0,
+					"source" : "Source/SVDFunctions"
+				},
+				{
+					"build" : "Source/ReshapeFunctions",
+					"jsonFile" : "directory-Source.ReshapeFunctions-Debug-05742894ae69fa4010e7.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.15.6"
+					},
+					"parentIndex" : 1,
+					"projectIndex" : 0,
+					"source" : "Source/ReshapeFunctions"
+				},
+				{
+					"build" : "Source/NNSupportFunctions",
+					"jsonFile" : "directory-Source.NNSupportFunctions-Debug-529f413cbededefaaddd.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.15.6"
+					},
+					"parentIndex" : 1,
+					"projectIndex" : 0,
+					"source" : "Source/NNSupportFunctions"
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6,
+						7,
+						8,
+						9,
+						10,
+						11
+					],
+					"name" : "CMSISNN",
+					"targetIndexes" : 
+					[
+						0
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 1,
+					"id" : "cmsis-nn::@43690dd2fb94c8e45e84",
+					"jsonFile" : "target-cmsis-nn-Debug-1417c970458a117a6ba0.json",
+					"name" : "cmsis-nn",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "D:/Keil5_MDK__For_STM32_cubeMX/My_Project/My_Qrs_project/LCD_LVGL/TOUCH_LCD_LVGL/build",
+		"source" : "D:/Keil5_MDK__For_STM32_cubeMX/My_Project/My_Qrs_project/LCD_LVGL/TOUCH_LCD_LVGL/Drivers/CMSIS/NN"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 11
+	}
+}

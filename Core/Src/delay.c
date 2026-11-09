@@ -15,7 +15,7 @@ void delay_us(uint32_t time)
 
     // 将延时时间转换为时钟周期数
     // 例如 HCLK = 168MHz，延时 10us，则 tick = 1680
-    tick = (uint64_t)time * System_Clock / 1000000;
+    tick = time * System_Clock;
 
     // 记录初始 SysTick 当前计数值
     told = SysTick->VAL;

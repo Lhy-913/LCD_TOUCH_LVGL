@@ -1,0 +1,18 @@
+{
+	"InstallScripts" : 
+	[
+		"D:/Keil5_MDK__For_STM32_cubeMX/My_Project/My_Qrs_project/LCD_LVGL/TOUCH_LCD_LVGL/build/cmake_install.cmake",
+		"D:/Keil5_MDK__For_STM32_cubeMX/My_Project/My_Qrs_project/LCD_LVGL/TOUCH_LCD_LVGL/build/Source/cmake_install.cmake",
+		"D:/Keil5_MDK__For_STM32_cubeMX/My_Project/My_Qrs_project/LCD_LVGL/TOUCH_LCD_LVGL/build/Source/BasicMathFunctions/cmake_install.cmake",
+		"D:/Keil5_MDK__For_STM32_cubeMX/My_Project/My_Qrs_project/LCD_LVGL/TOUCH_LCD_LVGL/build/Source/ConcatenationFunctions/cmake_install.cmake",
+		"D:/Keil5_MDK__For_STM32_cubeMX/My_Project/My_Qrs_project/LCD_LVGL/TOUCH_LCD_LVGL/build/Source/FullyConnectedFunctions/cmake_install.cmake",
+		"D:/Keil5_MDK__For_STM32_cubeMX/My_Project/My_Qrs_project/LCD_LVGL/TOUCH_LCD_LVGL/build/Source/ConvolutionFunctions/cmake_install.cmake",
+		"D:/Keil5_MDK__For_STM32_cubeMX/My_Project/My_Qrs_project/LCD_LVGL/TOUCH_LCD_LVGL/build/Source/ActivationFunctions/cmake_install.cmake",
+		"D:/Keil5_MDK__For_STM32_cubeMX/My_Project/My_Qrs_project/LCD_LVGL/TOUCH_LCD_LVGL/build/Source/PoolingFunctions/cmake_install.cmake",
+		"D:/Keil5_MDK__For_STM32_cubeMX/My_Project/My_Qrs_project/LCD_LVGL/TOUCH_LCD_LVGL/build/Source/SoftmaxFunctions/cmake_install.cmake",
+		"D:/Keil5_MDK__For_STM32_cubeMX/My_Project/My_Qrs_project/LCD_LVGL/TOUCH_LCD_LVGL/build/Source/SVDFunctions/cmake_install.cmake",
+		"D:/Keil5_MDK__For_STM32_cubeMX/My_Project/My_Qrs_project/LCD_LVGL/TOUCH_LCD_LVGL/build/Source/ReshapeFunctions/cmake_install.cmake",
+		"D:/Keil5_MDK__For_STM32_cubeMX/My_Project/My_Qrs_project/LCD_LVGL/TOUCH_LCD_LVGL/build/Source/NNSupportFunctions/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

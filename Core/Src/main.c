@@ -103,14 +103,12 @@ int main(void)
   MX_TIM6_Init();
   MX_USART1_UART_Init();
   MX_FMC_Init();
-  MX_DMA2D_Init();
+//MX_DMA2D_Init();
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
-  HAL_TIM_PWM_Start(&htim3,TIM_CHANNEL_2);//开启背光引脚的pwm
 // 若需要使用dma2d优化，将main中的dma2d初始化注释，开启lv_conf中的dma2d即可，否则会冲突
   HAL_TIM_Base_Start_IT(&htim6);
-  LCD_Brightness(0);
-   
+
    HAL_Delay(150); // NT35510手册中写明内部电池上电后需等待120ms才使用，这里做了冗余
    uint8_t lvgl_choose = 1;    // 0 测试   1 lvgl
    uint8_t stress_choose = 0;  // 0 用户ui 1 压力测试
@@ -137,6 +135,7 @@ else
     LCD_Brightness(bring_now);
 
 }
+  HAL_TIM_PWM_Start(&htim3,TIM_CHANNEL_2);//开启背光引脚的pwm
 
   /* USER CODE END 2 */
 
