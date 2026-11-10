@@ -63,7 +63,7 @@ void MX_FMC_Init(void)
   hsram1.Init.PageSize = FMC_PAGE_SIZE_NONE;
   /* Timing */
   Timing.AddressSetupTime = 2;
-  Timing.AddressHoldTime = 2;
+  Timing.AddressHoldTime = 15;
   Timing.DataSetupTime = 4;
   Timing.BusTurnAroundDuration = 0;
   Timing.CLKDivision = 16;
@@ -71,8 +71,8 @@ void MX_FMC_Init(void)
   Timing.AccessMode = FMC_ACCESS_MODE_A;
   /* ExtTiming */
   ExtTiming.AddressSetupTime = 2;
-  ExtTiming.AddressHoldTime = 2;
-  ExtTiming.DataSetupTime = 4;
+  ExtTiming.AddressHoldTime = 15;
+  ExtTiming.DataSetupTime = 2;
   ExtTiming.BusTurnAroundDuration = 0;
   ExtTiming.CLKDivision = 16;
   ExtTiming.DataLatency = 17;

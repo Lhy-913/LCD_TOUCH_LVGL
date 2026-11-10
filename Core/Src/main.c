@@ -103,7 +103,7 @@ int main(void)
   MX_TIM6_Init();
   MX_USART1_UART_Init();
   MX_FMC_Init();
-//MX_DMA2D_Init();
+  MX_DMA2D_Init();
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
 // 若需要使用dma2d优化，将main中的dma2d初始化注释，开启lv_conf中的dma2d即可，否则会冲突
