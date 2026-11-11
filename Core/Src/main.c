@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "can.h"
 #include "dma.h"
 #include "dma2d.h"
 #include "tim.h"
@@ -105,6 +106,7 @@ int main(void)
   MX_FMC_Init();
   MX_DMA2D_Init();
   MX_TIM3_Init();
+  MX_CAN1_Init();
   /* USER CODE BEGIN 2 */
 // 若需要使用dma2d优化，将main中的dma2d初始化注释，开启lv_conf中的dma2d即可，否则会冲突
   HAL_TIM_Base_Start_IT(&htim6);
