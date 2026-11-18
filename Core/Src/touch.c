@@ -200,7 +200,7 @@ HAL_GPIO_Init(GT1151_INT_PORT, &GPIO_InitStruct);
 
 
 GT1151_Rd_data(0x8140,TOUCH_ID,4);
-HAL_UART_Transmit(&huart1,TOUCH_ID,sizeof(TOUCH_ID),HAL_MAX_DELAY);
+//HAL_UART_Transmit(&huart1,TOUCH_ID,sizeof(TOUCH_ID),HAL_MAX_DELAY);//打印触摸芯片型号
 
 }
 

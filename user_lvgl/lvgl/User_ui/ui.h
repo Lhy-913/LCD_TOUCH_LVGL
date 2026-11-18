@@ -17,6 +17,11 @@ extern uint8_t user_chooser;
 #define LINE_COLOR 0x8FE649 //荧光绿
 #define BACKGROUND_COLOR 0x0B0F14 //科技黑
 #define Information_Panel 0x202225 //科技灰
+#define Chart_COLOR 0x22C55E //图表柱体颜色
+
+#define Change_Start_Btn_COLOR 0x22C55E //启动按钮颜色
+#define Change_Pause_Btn_COLOR 0x64748B //暂停按钮颜色
+
 
 /* 函数声明 */
 void ui_create(void);

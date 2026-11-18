@@ -1,16 +1,31 @@
 #include "Charging_Status.h"
 #include "ui.h"
 
+    uint16_t Charging_POWER_Kw = 70;//假装平均充电功率
     int Charging_now = 70;//假装当前电量
-    uint16_t Charging_MAX_Kw = 130;//假装当前充电最大功率
+    uint16_t Charging_MAX_Kw = 130;//假装当前最大功率
+    uint16_t Charging_Time_Minutes = 34;//假装剩余时间
+    static bool is_charging = false; // 初始状态为充电中
     bool Per_Minute_Data = 0;//每x分钟数据 0：x = 1分钟 1：x = 3分钟
-    lv_obj_t * Charging_Chart = NULL;
+
+    lv_obj_t * Charging_Chart = NULL;//充电状态图表
 
     static const int32_t data[] = {
     23, 67, 41, 89, 12, 76, 54, 32, 95, 48,
     71, 16, 83, 37, 62, 28, 91, 45, 74, 19,
     56, 98, 34, 81, 25, 63, 47,130, 87, 52
     };
+
+static void Change_Btn_event_cb(lv_event_t * e)
+{
+    is_charging = !is_charging;
+    lv_obj_t * Change_Btn = lv_event_get_target(e);
+    lv_obj_t * Change_Btn_label = lv_obj_get_child(Change_Btn, 0);
+    lv_label_set_text( Change_Btn_label, (is_charging ? "Pause" : "Start"));
+    lv_obj_set_style_opa(Change_Btn_label,(is_charging ? LV_OPA_COVER : LV_OPA_80), LV_PART_MAIN);
+    lv_obj_align_to(Change_Btn_label, Change_Btn, LV_ALIGN_CENTER, 0, 0);
+    lv_obj_set_style_bg_color(Change_Btn, lv_color_hex(is_charging ? Change_Pause_Btn_COLOR : Change_Start_Btn_COLOR), LV_PART_MAIN);
+}
 
 
 static void Per_Minute_Choose_3min_event_cb(lv_event_t * e)
@@ -20,7 +35,7 @@ static void Per_Minute_Choose_3min_event_cb(lv_event_t * e)
 
     lv_obj_set_style_opa(lv_obj_get_child(parent, 2),
                         LV_OPA_COVER, LV_PART_MAIN);
-    lv_obj_set_style_opa(obj, LV_OPA_80, LV_PART_MAIN);
+    lv_obj_set_style_opa(obj, LV_OPA_60, LV_PART_MAIN);
 
     Per_Minute_Data = 1;
     lv_obj_set_style_pad_column(Charging_Chart, 1, LV_PART_MAIN);
@@ -40,7 +55,7 @@ static void Per_Minute_Choose_1min_event_cb(lv_event_t * e)
     lv_obj_t * parent = lv_obj_get_parent(obj);
     lv_obj_set_style_opa(lv_obj_get_child(parent, 1),
                         LV_OPA_COVER, LV_PART_MAIN);
-    lv_obj_set_style_opa(obj, LV_OPA_80, LV_PART_MAIN);
+    lv_obj_set_style_opa(obj, LV_OPA_60, LV_PART_MAIN);
 
     Per_Minute_Data = 0;
     lv_obj_set_style_pad_column(Charging_Chart, 18, LV_PART_MAIN);
@@ -148,7 +163,7 @@ void charging_status_create(void)
     lv_obj_t * label_power = lv_label_create(Charging_status_Left);
     lv_obj_set_style_text_color(label_power, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
     lv_obj_set_style_text_font(label_power, &lv_font_montserrat_28, LV_PART_MAIN);  // 大字
-    lv_label_set_text(label_power, "323 kW");
+    lv_label_set_text_fmt(label_power, "%d kW",Charging_POWER_Kw );
 
     // ---------- 剩余时间 ----------
     lv_obj_t * Estimated_Time_to_Full = lv_label_create(Charging_status_Left);
@@ -159,7 +174,7 @@ void charging_status_create(void)
     lv_obj_t * label_time = lv_label_create(Charging_status_Left);
     lv_obj_set_style_text_color(label_time, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
     lv_obj_set_style_text_font(label_time, &lv_font_montserrat_22, LV_PART_MAIN);
-    lv_label_set_text(label_time, "14 min");
+    lv_label_set_text_fmt(label_time, "%d min", Charging_Time_Minutes);
 
 
 
@@ -195,6 +210,32 @@ void charging_status_create(void)
     lv_obj_set_style_text_color(lable, lv_color_hex(0xFFFFFF), 0);
     lv_obj_set_style_text_font(lable, &lv_font_montserrat_12, LV_PART_MAIN);
 
+    // 创建充电按钮
+    lv_obj_t * Change_btn = lv_btn_create(Charging_status_Right);
+    lv_obj_set_size(Change_btn, LV_PCT(22), LV_PCT(10));
+    lv_obj_align(Change_btn, LV_ALIGN_TOP_RIGHT, 5, -2);
+
+    lv_obj_set_style_bg_color(Change_btn,
+                            lv_color_hex(Change_Start_Btn_COLOR),
+                            LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(Change_btn, LV_OPA_80, LV_PART_MAIN);
+    lv_obj_set_style_radius(Change_btn, 8, LV_PART_MAIN);
+    lv_obj_set_style_shadow_width(Change_btn, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_all(Change_btn, 0, LV_PART_MAIN);
+
+    lv_obj_add_event_cb(Change_btn, Change_Btn_event_cb,
+                        LV_EVENT_LONG_PRESSED, NULL);
+
+    // 创建按钮标签
+    lv_obj_t * Change_btn_label = lv_label_create(Change_btn);
+    lv_label_set_text(Change_btn_label, "Charging");
+    lv_obj_set_style_text_color(Change_btn_label,
+                            lv_color_hex(0xE8FFF0),
+                            LV_PART_MAIN);
+    lv_obj_set_style_text_font(Change_btn_label,
+                            &lv_font_montserrat_14,
+                            LV_PART_MAIN);
+    lv_obj_center(Change_btn_label);
 
     //电池区显示
     lv_obj_t *Battery = lv_obj_create(Charging_status_Right);
@@ -357,7 +398,7 @@ void charging_status_create(void)
     // 添加一条数据序列，颜色为绿色，使用左侧 Y 轴
     lv_chart_series_t * ser = lv_chart_add_series(
         Charging_Chart,
-        lv_color_hex(0x22C55E),
+        lv_color_hex(Chart_COLOR),
         LV_CHART_AXIS_PRIMARY_Y
     );
 
@@ -367,7 +408,7 @@ void charging_status_create(void)
         lv_chart_set_series_value_by_id(Charging_Chart, ser, i, data[i]);
     }
 
-    //y坐标参数解释文本
+    //y坐标轴文本
     lv_obj_t * chart_label_top = lv_label_create(Battery);
     lv_label_set_text_fmt(chart_label_top, "%d Kw", Charging_MAX_Kw);
     lv_obj_set_style_text_color(chart_label_top, lv_color_hex(0xFFFFFF), LV_PART_MAIN);

@@ -18,10 +18,7 @@ void brightness_event_handler(lv_event_t * e)
 void sleeptime_event_handler(lv_event_t * e)
 {
     lv_obj_t * sleeptime_btn = lv_event_get_target(e);
-
-
 }
-
 
 // 创建无背景、无边框、无圆角、无阴影的基础容器
 static lv_obj_t * settings_create_plain(lv_obj_t * parent)

@@ -15,7 +15,7 @@ extern UART_HandleTypeDef huart1;
 
 
 static uint16_t *src = NULL;//对接lvgl的画面数据指针
-volatile uint8_t bring_now = 100;//初始亮度值
+volatile uint8_t bring_now = 100;//初始亮度值（需要手动加入到LVGL的设置页面中的回调，接收来自lvgl的设定亮度）
 //总数据量和dma剩余处理数量
 uint32_t len = 0;
 uint32_t DMAremain = 0;
