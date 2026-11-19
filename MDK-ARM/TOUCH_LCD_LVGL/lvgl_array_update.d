@@ -35,6 +35,7 @@ touch_lcd_lvgl\lvgl_array_update.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4x
 touch_lcd_lvgl\lvgl_array_update.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h
 touch_lcd_lvgl\lvgl_array_update.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h
 touch_lcd_lvgl\lvgl_array_update.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h
+touch_lcd_lvgl\lvgl_array_update.o: D:\Keil5_MDK__For_STM32_cubeMX\Core\ARM\ARMCC\Bin\..\include\stdbool.h
 touch_lcd_lvgl\lvgl_array_update.o: ../Core/Inc/printf.h
 touch_lcd_lvgl\lvgl_array_update.o: D:\Keil5_MDK__For_STM32_cubeMX\Core\ARM\ARMCC\Bin\..\include\stdio.h
 touch_lcd_lvgl\lvgl_array_update.o: ../Core/Inc/usart.h

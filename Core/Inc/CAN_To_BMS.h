@@ -14,7 +14,9 @@ void Can_send_message(uint32_t id, uint8_t *data, uint8_t length);
 void Can_read_FIFO0_message(uint32_t *id, uint8_t *data, uint8_t *length);
 void Can_Get_BMS_Message(void);
 
-
+extern uint16_t Estimated_Charging_Time;//剩余充电时间(单位分钟)
+extern float PowerReal;//实时功率
+extern float PowerReal_x10;//实时功率*10
 
 typedef enum
 {

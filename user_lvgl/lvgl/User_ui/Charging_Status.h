@@ -3,6 +3,9 @@
 
 #include "lvgl/lvgl.h"
 
-void charging_status_create(void);
+extern bool Chart_Update_Start ;
+
+void charging_status_create(void); // 充电界面创建
+void Charging_Status_Update(void); // 充电界面状态值更新	
 
 #endif

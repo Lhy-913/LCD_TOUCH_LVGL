@@ -1,23 +1,45 @@
 #include "Charging_Status.h"
 #include "ui.h"
 
-    uint16_t Charging_POWER_Kw = 70;//假装平均充电功率
-    int Charging_now = 70;//假装当前电量
-    uint16_t Charging_MAX_Kw = 130;//假装当前最大功率
-    uint16_t Charging_Time_Minutes = 34;//假装剩余时间
-    static bool is_charging = false; // 初始状态为充电中
-    bool Per_Minute_Data = 0;//每x分钟数据 0：x = 1分钟 1：x = 3分钟
+#include "Lvgl_Array_Update.h"
+#include "CAN_To_BMS.h"
 
-    lv_obj_t * Charging_Chart = NULL;//充电状态图表
+uint16_t Charging_POWER_Kw = 0;//充电功率
+uint16_t Charging_MAX_Kw = 0;//图表显示的最大功率
+uint16_t Charging_Time_Minutes = 0;//充电剩余时间
 
-    static const int32_t data[] = {
-    23, 67, 41, 89, 12, 76, 54, 32, 95, 48,
-    71, 16, 83, 37, 62, 28, 91, 45, 74, 19,
-    56, 98, 34, 81, 25, 63, 47,130, 87, 52
-    };
+bool Chart_Update_Start = false; // 开始状态，用于图表刷新开始
+bool is_charging = false; // 初始状态为充电中
 
-static void Change_Btn_event_cb(lv_event_t * e)
+bool Per_Minute_Data = 0;//每x分钟数据 0：x = 1分钟 1：x = 3分钟
+
+static lv_obj_t *label_power;
+static lv_obj_t *label_time;
+static lv_obj_t *chart_label_top;
+static lv_obj_t *chart_label_mid;
+
+lv_obj_t * Charging_Chart = NULL;//充电状态图表
+lv_chart_series_t * ser = NULL;  //充电状态图表 - 数据序列1
+const float *data = User_Change_message_date.buff;
+    
+void Charging_Status_Update(void)//更新充电界面的各状态值
 {
+    Charging_POWER_Kw = PowerReal_x10;
+    Charging_MAX_Kw = User_Change_message_date.Max_Date;
+    Charging_Time_Minutes = Estimated_Charging_Time;
+
+    lv_label_set_text_fmt(label_power, "%u kW", Charging_POWER_Kw);
+    lv_label_set_text_fmt(label_time, "%u min", Charging_Time_Minutes);
+
+    lv_label_set_text_fmt(chart_label_top, "%u Kw", Charging_MAX_Kw);
+    lv_label_set_text_fmt(chart_label_mid, "%u Kw", Charging_MAX_Kw / 2);
+    lv_chart_set_axis_range(Charging_Chart, LV_CHART_AXIS_PRIMARY_Y,
+                            0, Charging_MAX_Kw);
+}
+
+static void Change_Btn_event_cb(lv_event_t * e)//充电状态更改按钮
+{    
+    Chart_Update_Start = 1;
     is_charging = !is_charging;
     lv_obj_t * Change_Btn = lv_event_get_target(e);
     lv_obj_t * Change_Btn_label = lv_obj_get_child(Change_Btn, 0);
@@ -26,7 +48,6 @@ static void Change_Btn_event_cb(lv_event_t * e)
     lv_obj_align_to(Change_Btn_label, Change_Btn, LV_ALIGN_CENTER, 0, 0);
     lv_obj_set_style_bg_color(Change_Btn, lv_color_hex(is_charging ? Change_Pause_Btn_COLOR : Change_Start_Btn_COLOR), LV_PART_MAIN);
 }
-
 
 static void Per_Minute_Choose_3min_event_cb(lv_event_t * e)
 {
@@ -43,10 +64,6 @@ static void Per_Minute_Choose_3min_event_cb(lv_event_t * e)
 
     lv_chart_series_t * ser = lv_chart_get_series_next(Charging_Chart, NULL);
 
-    for(uint32_t i = 0; i < 30; i++)
-    {
-        lv_chart_set_series_value_by_id(Charging_Chart, ser, i, data[i]);
-    }
 }
 
 static void Per_Minute_Choose_1min_event_cb(lv_event_t * e)
@@ -160,7 +177,7 @@ void charging_status_create(void)
     lv_obj_set_style_text_font(label_power_title, &lv_font_montserrat_12, LV_PART_MAIN);
     lv_label_set_text(label_power_title, "Power");
 
-    lv_obj_t * label_power = lv_label_create(Charging_status_Left);
+    label_power = lv_label_create(Charging_status_Left);
     lv_obj_set_style_text_color(label_power, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
     lv_obj_set_style_text_font(label_power, &lv_font_montserrat_28, LV_PART_MAIN);  // 大字
     lv_label_set_text_fmt(label_power, "%d kW",Charging_POWER_Kw );
@@ -171,7 +188,7 @@ void charging_status_create(void)
     lv_obj_set_style_text_font(Estimated_Time_to_Full, &lv_font_montserrat_12, LV_PART_MAIN);
     lv_label_set_text(Estimated_Time_to_Full, "Estimated Time to Full");
 
-    lv_obj_t * label_time = lv_label_create(Charging_status_Left);
+    label_time = lv_label_create(Charging_status_Left);
     lv_obj_set_style_text_color(label_time, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
     lv_obj_set_style_text_font(label_time, &lv_font_montserrat_22, LV_PART_MAIN);
     lv_label_set_text_fmt(label_time, "%d min", Charging_Time_Minutes);
@@ -331,7 +348,7 @@ void charging_status_create(void)
     //设置图表背景颜色
     lv_obj_set_style_bg_color(Charging_Chart, lv_color_hex(BACKGROUND_COLOR), 0);
 
-    // 设置图表类型：折线图
+    // 设置图表类型：柱状图
     lv_chart_set_type(Charging_Chart, LV_CHART_TYPE_BAR);
 
     //创建一个隐藏的标签，用于显示用户选中图表中的值
@@ -352,14 +369,8 @@ void charging_status_create(void)
                     chart_value_label);
 
     // 设置数据点数量
-    if(Per_Minute_Data == 0)
-    {
-        lv_chart_set_point_count(Charging_Chart, 15);
-    }
-    else
-    {
-        lv_chart_set_point_count(Charging_Chart, 30);
-    }
+    lv_chart_set_point_count(Charging_Chart, 15);
+
     // 设置 Y 轴范围：0 ~ Charging_MAX_Kw
     lv_chart_set_axis_range(Charging_Chart, LV_CHART_AXIS_PRIMARY_Y, 0, Charging_MAX_Kw);
     // 设置水平、垂直分割线数量
@@ -396,20 +407,14 @@ void charging_status_create(void)
     lv_chart_set_cursor_pos_y(Charging_Chart, cursor1, 8);
     lv_chart_set_cursor_pos_y(Charging_Chart, cursor2, 75);
     // 添加一条数据序列，颜色为绿色，使用左侧 Y 轴
-    lv_chart_series_t * ser = lv_chart_add_series(
+    ser = lv_chart_add_series(
         Charging_Chart,
         lv_color_hex(Chart_COLOR),
         LV_CHART_AXIS_PRIMARY_Y
     );
 
-
-    for(uint32_t i = 0; i < (Per_Minute_Data ? 30:15); i++)
-    {
-        lv_chart_set_series_value_by_id(Charging_Chart, ser, i, data[i]);
-    }
-
     //y坐标轴文本
-    lv_obj_t * chart_label_top = lv_label_create(Battery);
+    chart_label_top = lv_label_create(Battery);
     lv_label_set_text_fmt(chart_label_top, "%d Kw", Charging_MAX_Kw);
     lv_obj_set_style_text_color(chart_label_top, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
     lv_obj_set_style_pad_all(chart_label_top, 0, LV_PART_MAIN);
@@ -417,7 +422,7 @@ void charging_status_create(void)
                     LV_ALIGN_OUT_LEFT_TOP, 2, -5);
     lv_obj_set_style_text_font(chart_label_top, &lv_font_montserrat_12, LV_PART_MAIN);
 
-    lv_obj_t * chart_label_mid = lv_label_create(Battery);
+    chart_label_mid = lv_label_create(Battery);
     lv_label_set_text_fmt(chart_label_mid, "%d Kw", (Charging_MAX_Kw/2));
     lv_obj_set_style_text_color(chart_label_mid, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
     lv_obj_set_style_pad_all(chart_label_mid, 0, LV_PART_MAIN);

@@ -283,3 +283,5 @@ touch_lcd_lvgl\main.o: ../user_lvgl/lvgl/demos/stress/lv_demo_stress.h
 touch_lcd_lvgl\main.o: ../user_lvgl/lvgl/demos/stress/../lv_demos.h
 touch_lcd_lvgl\main.o: ../user_lvgl/lvgl/User_ui/ui.h
 touch_lcd_lvgl\main.o: ../user_lvgl/lvgl/lvgl.h
+touch_lcd_lvgl\main.o: ../user_lvgl/lvgl/User_ui/Charging_Status.h
+touch_lcd_lvgl\main.o: ../user_lvgl/lvgl/lvgl.h

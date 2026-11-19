@@ -40,7 +40,10 @@
 #include "lv_port_indev.h"
 #include "lvgl/lvgl.h"
 #include "lv_demos.h"
+
 #include "ui.h"
+#include "Charging_Status.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -142,6 +145,12 @@ else
 
 }
   HAL_TIM_PWM_Start(&htim3,TIM_CHANNEL_2);//开启背光引脚的pwm
+
+//测试
+
+extern  bool is_charging; // 初始状态为充电中
+
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -151,6 +160,12 @@ else
       
     while(lvgl_choose)
     {
+        Can_Get_BMS_Message();
+        if(Chart_Update_Start)Charging_Status_Update();
+            
+        //IGT6 Send Commnd to Bms
+        Can_send_message(Adjust_Charging_Status,(uint8_t*)&is_charging,sizeof(is_charging));
+        
         lv_timer_handler();
         __WFI();
     }

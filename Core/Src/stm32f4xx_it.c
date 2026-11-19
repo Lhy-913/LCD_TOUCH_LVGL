@@ -261,7 +261,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
         sleep_time++;
 
         if (sleep_time > 6 && sleep_time < 10) LCD_Brightness(30);
-        else if (sleep_time > 10)
+        else if (sleep_time > 50)
         {
             lcd_sleep_flag = 1;
             __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, 0);
