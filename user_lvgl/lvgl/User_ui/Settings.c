@@ -4,43 +4,43 @@
 
 #include "stm32f4xx_it.h"
 
-
 // 设置界面颜色定义
-#define SETTINGS_PANEL_COLOR  0x151B22    // 设置面板背景色
-#define SETTINGS_TEXT_COLOR   0xE6EBF0    // 主要文字颜色
-#define SETTINGS_MUTED_COLOR  0x9AA6B2    // 次级文字颜色
-#define SETTINGS_ACCENT_COLOR 0x4AA8F0    // 强调色
-bool Settings_Brightness_Adaptation = false;       // 亮度自适应开关，false：关闭，true：开启
-uint8_t Settings_Brightness = 100;                 // 当前屏幕亮度，范围 0~100
-uint32_t Sleep_Time_Selected_Index = 0;            // 休眠时间下拉框当前选中索引
-bool Settings_Screen_Saver = true;                 // 屏幕保护功能开关
-bool Settings_Time_Schedule = false;               // 定时功能开关
-uint32_t Settings_Screen_Saver_Type_Index = 0;    // 屏幕保护类型下拉框当前选中索引
-bool Settings_Screen_Lock = false;                 // 屏幕锁定功能开关
-uint32_t Settings_Font_Size_Index = 1;             // 字体大小下拉框当前选中索引
+#define SETTINGS_PANEL_COLOR 0x151B22 // 设置面板背景色
+#define SETTINGS_TEXT_COLOR 0xE6EBF0 // 主要文字颜色
+#define SETTINGS_MUTED_COLOR 0x9AA6B2 // 次级文字颜色
+#define SETTINGS_ACCENT_COLOR 0x4AA8F0 // 强调色
 
-void brightness_event_handler(lv_event_t * e)
+bool Settings_Brightness_Adaptation = false; // 亮度自适应开关，false：关闭，true：开启
+uint8_t Settings_Brightness = 100; // 当前屏幕亮度，范围 0~100
+uint32_t Sleep_Time_Selected_Index = 0; // 休眠时间下拉框的初始下标
+bool Settings_Screen_Saver = true; // 屏幕保护功能开关
+bool Settings_Time_Schedule = false; // 定时功能开关
+uint32_t Settings_Screen_Saver_Type_Index = 0; // 屏幕保护类型下拉框当前选中索引
+bool Settings_Screen_Lock = false; // 屏幕锁定功能开关
+uint32_t Settings_Font_Size_Index = 1; // 字体大小下拉框的初始下标
+
+void brightness_event_handler(lv_event_t *e)
 {
-    lv_obj_t * slider = lv_event_get_target(e);   // 获取触发事件的滑块对象
+    lv_obj_t *slider = lv_event_get_target(e); // 获取触发事件的滑块对象
     Settings_Brightness = (uint8_t)lv_slider_get_value(slider); // 获取滑块当前数值并更新亮度设置
-    bring_now = Settings_Brightness;              // 同步当前亮度值到实际背光控制变量
+    bring_now = Settings_Brightness; // 同步当前亮度值到实际背光控制变量
 }
 
-static void settings_switch_event_handler(lv_event_t * e)
+static void settings_switch_event_handler(lv_event_t *e)
 {
     bool *value = (bool *)lv_event_get_user_data(e); // 获取当前开关对应的布尔变量地址
     *value = lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED); // 获取开关状态并更新对应变量
 }
 
-static void settings_dropdown_event_handler(lv_event_t * e)
+static void settings_dropdown_event_handler(lv_event_t *e)
 {
-    lcd_sleep_Choose = lv_dropdown_get_selected(lv_event_get_target(e)); // 获取当前选中索引   
-    
+    lcd_sleep_Choose = lv_dropdown_get_selected(lv_event_get_target(e)); // 将当前下拉框的选中下标写入休眠选择变量
 }
+
 // 创建无背景、无边框、无圆角、无阴影的基础容器
-static lv_obj_t * settings_create_plain(lv_obj_t * parent)
+static lv_obj_t *settings_create_plain(lv_obj_t *parent)
 {
-    lv_obj_t * obj = lv_obj_create(parent);
+    lv_obj_t *obj = lv_obj_create(parent);
 
     lv_obj_set_style_bg_opa(obj, LV_OPA_TRANSP, LV_PART_MAIN);
     lv_obj_set_style_border_width(obj, 0, LV_PART_MAIN);
@@ -55,12 +55,11 @@ static lv_obj_t * settings_create_plain(lv_obj_t * parent)
     return obj;
 }
 
-
 // 创建文字标签，统一设置文字内容、颜色和字体
-static lv_obj_t * settings_create_label(lv_obj_t * parent, const char * text,
-                                        uint32_t color, const lv_font_t * font)
+static lv_obj_t *settings_create_label(lv_obj_t *parent, const char *text,
+                                       uint32_t color, const lv_font_t *font)
 {
-    lv_obj_t * label = lv_label_create(parent);
+    lv_obj_t *label = lv_label_create(parent);
 
     lv_label_set_text(label, text);
     lv_obj_set_style_text_color(label, lv_color_hex(color), LV_PART_MAIN);
@@ -69,9 +68,8 @@ static lv_obj_t * settings_create_label(lv_obj_t * parent, const char * text,
     return label;
 }
 
-
 // 设置下拉列表的统一样式
-static void settings_style_dropdown(lv_obj_t * dropdown)
+static void settings_style_dropdown(lv_obj_t *dropdown)
 {
     lv_obj_set_width(dropdown, 164);
     lv_obj_set_height(dropdown, 27);
@@ -93,8 +91,8 @@ static void settings_style_dropdown(lv_obj_t * dropdown)
     lv_obj_set_style_text_color(dropdown, lv_color_hex(SETTINGS_TEXT_COLOR), LV_PART_MAIN);
     lv_obj_set_style_text_font(dropdown, &lv_font_montserrat_14, LV_PART_MAIN);
 
-        // 获取下拉列表对象
-    lv_obj_t * list = lv_dropdown_get_list(dropdown);
+    // 获取下拉列表对象
+    lv_obj_t *list = lv_dropdown_get_list(dropdown);
 
     // 下拉面板背景色
     lv_obj_set_style_bg_color(list, lv_color_hex(BACKGROUND_COLOR), LV_PART_MAIN);
@@ -116,7 +114,7 @@ static void settings_style_dropdown(lv_obj_t * dropdown)
     lv_obj_set_style_bg_opa(list, LV_OPA_COVER,
                             LV_PART_SELECTED | LV_STATE_PRESSED);
 
-                                // 统一下拉选项文字颜色
+    // 统一下拉选项文字颜色
     lv_obj_set_style_text_color(list, lv_color_hex(SETTINGS_TEXT_COLOR), LV_PART_MAIN);
 
     // 统一字体透明度，保持文字清晰
@@ -128,11 +126,10 @@ static void settings_style_dropdown(lv_obj_t * dropdown)
                               LV_PART_SELECTED | LV_STATE_PRESSED);
 }
 
-
 // 创建单行设置项目，左侧为名称，右侧为设置控件
-static lv_obj_t * settings_create_row(lv_obj_t * parent, const char * title)
+static lv_obj_t *settings_create_row(lv_obj_t *parent, const char *title)
 {
-    lv_obj_t * row = settings_create_plain(parent);
+    lv_obj_t *row = settings_create_plain(parent);
 
     // 设置行尺寸
     lv_obj_set_size(row, LV_PCT(100), 30);
@@ -147,8 +144,8 @@ static lv_obj_t * settings_create_row(lv_obj_t * parent, const char * title)
     lv_obj_set_style_pad_column(row, 8, LV_PART_MAIN);
 
     // 创建设置项目名称
-    lv_obj_t * label = settings_create_label(row, title, SETTINGS_TEXT_COLOR,
-                                              &lv_font_montserrat_14);
+    lv_obj_t *label = settings_create_label(row, title, SETTINGS_TEXT_COLOR,
+                                            &lv_font_montserrat_14);
 
     // 名称区域自动占据剩余宽度
     lv_obj_set_width(label, 0);
@@ -157,11 +154,10 @@ static lv_obj_t * settings_create_row(lv_obj_t * parent, const char * title)
     return row;
 }
 
-
 // 创建开关控件，并设置初始状态
-static void settings_add_switch(lv_obj_t * row, bool checked, bool *value)
+static void settings_add_switch(lv_obj_t *row, bool checked, bool *value)
 {
-    lv_obj_t * sw = lv_switch_create(row);
+    lv_obj_t *sw = lv_switch_create(row);
 
     *value = checked;
     lv_obj_add_event_cb(sw, settings_switch_event_handler,
@@ -184,15 +180,15 @@ static void settings_add_switch(lv_obj_t * row, bool checked, bool *value)
     lv_obj_set_style_bg_opa(sw, LV_OPA_COVER, LV_PART_KNOB);
 
     // 设置开关初始状态
-    if(checked) lv_obj_add_state(sw, LV_STATE_CHECKED);
+    if (checked)
+        lv_obj_add_state(sw, LV_STATE_CHECKED);
 }
 
-
 // 创建下拉列表并设置选项及默认选中项
-static lv_obj_t * settings_add_dropdown(lv_obj_t * row, const char * options,
-                                        uint32_t selected, uint32_t *value)
+static lv_obj_t *settings_add_dropdown(lv_obj_t *row, const char *options,
+                                       uint32_t selected, uint32_t *value)
 {
-    lv_obj_t * dropdown = lv_dropdown_create(row);
+    lv_obj_t *dropdown = lv_dropdown_create(row);
 
     *value = selected;
 
@@ -211,14 +207,13 @@ static lv_obj_t * settings_add_dropdown(lv_obj_t * row, const char * options,
     return dropdown;
 }
 
-
 // 设置界面初始化
 void settings_init(void)
 {
     /* 第一部分：创建设置页面及顶部标题栏。 */
 
     // 创建设置页面
-    lv_obj_t * page = lv_obj_create(User_Screen);
+    lv_obj_t *page = lv_obj_create(User_Screen);
     lv_obj_set_size(page, LV_PCT(100), LV_PCT(100));
 
     // 应用通用 UI 样式
@@ -235,15 +230,14 @@ void settings_init(void)
     // 禁止页面滚动
     lv_obj_remove_flag(page, LV_OBJ_FLAG_SCROLLABLE);
 
-
     // 顶部标题栏
-    lv_obj_t * header = settings_create_plain(page);
+    lv_obj_t *header = settings_create_plain(page);
     lv_obj_set_size(header, LV_PCT(100), 30);
 
     // 标题栏采用横向布局
     lv_obj_set_flex_flow(header, LV_FLEX_FLOW_ROW);
 
-    // 标题和保存按钮分别靠左右两端
+    // 标题栏内容两端对齐
     lv_obj_set_flex_align(header, LV_FLEX_ALIGN_SPACE_BETWEEN,
                           LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
 
@@ -254,7 +248,7 @@ void settings_init(void)
     /* 第二部分：创建主体设置区域。 */
 
     // 创建主体容器
-    lv_obj_t * body = settings_create_plain(page);
+    lv_obj_t *body = settings_create_plain(page);
 
     // 主体宽度铺满页面，高度自动占据剩余空间
     lv_obj_set_width(body, LV_PCT(100));
@@ -263,11 +257,10 @@ void settings_init(void)
     // 主体采用纵向布局
     lv_obj_set_flex_flow(body, LV_FLEX_FLOW_COLUMN);
 
-
     /* 第三部分：创建设置内容面板。 */
 
     // 创建设置面板
-    lv_obj_t * panel = lv_obj_create(body);
+    lv_obj_t *panel = lv_obj_create(body);
 
     // 面板铺满主体区域
     lv_obj_set_size(panel, LV_PCT(100), LV_PCT(100));
@@ -291,14 +284,12 @@ void settings_init(void)
     lv_obj_set_scrollbar_mode(panel, LV_SCROLLBAR_MODE_OFF);
     lv_obj_remove_flag(panel, LV_OBJ_FLAG_SCROLLABLE);
 
-
     /* 第四部分：亮度自适应设置。 */
 
     // 创建亮度自适应设置行
-    lv_obj_t * row = settings_create_row(panel, "Brightness Adaptation");
+    lv_obj_t *row = settings_create_row(panel, "Brightness Adaptation");
     // 创建亮度自适应开关，默认关闭
     settings_add_switch(row, false, &Settings_Brightness_Adaptation);
-
 
     /* 第五部分：屏幕亮度设置。 */
 
@@ -306,7 +297,7 @@ void settings_init(void)
     row = settings_create_row(panel, "Brightness");
 
     // 创建亮度滑块
-    lv_obj_t * brightness = lv_slider_create(row);
+    lv_obj_t *brightness = lv_slider_create(row);
     lv_obj_add_event_cb(brightness, brightness_event_handler, LV_EVENT_PRESSING, NULL);
 
     // 滑块尺寸
@@ -330,27 +321,24 @@ void settings_init(void)
     lv_obj_set_style_bg_color(brightness, lv_color_hex(0xE6EBF0), LV_PART_KNOB);
 
     // 当前亮度数值
-    lv_obj_t * brightness_value = settings_create_label(row, "100", SETTINGS_MUTED_COLOR,
-                                                        &lv_font_montserrat_12);
+    lv_obj_t *brightness_value = settings_create_label(row, "100", SETTINGS_MUTED_COLOR,
+                                                       &lv_font_montserrat_12);
 
     // 数值标签宽度及文字对齐方式
     lv_obj_set_width(brightness_value, 26);
     lv_obj_set_style_text_align(brightness_value, LV_TEXT_ALIGN_RIGHT, LV_PART_MAIN);
-
 
     /* 第六部分：屏幕待机时间设置。 */
 
     // 创建待机时间设置行
     row = settings_create_row(panel, "Sleep Time");
 
-    // 待机时间选项，默认选择 1 minute
-    settings_add_dropdown(row,"15 Second\n30 Second\n1 minute\n5 minute",
+    // 待机时间选项，默认下标为 0，对应 15 秒
+    settings_add_dropdown(row, "15 Second\n30 Second\n1 minute\n5 minute",
                           Sleep_Time_Selected_Index,
                           &Sleep_Time_Selected_Index);
 
-
     /* 第七部分：屏幕保护时间设置。 */
-
 
     /* 第八部分：屏幕保护功能设置。 */
 
@@ -360,7 +348,6 @@ void settings_init(void)
     // 屏幕保护开关，默认开启
     settings_add_switch(row, true, &Settings_Screen_Saver);
 
-
     /* 第九部分：定时功能设置。 */
 
     // 创建定时功能设置行
@@ -369,9 +356,7 @@ void settings_init(void)
     // 定时功能开关，默认关闭
     settings_add_switch(row, false, &Settings_Time_Schedule);
 
-
     /* 第十部分：屏幕保护类型设置。 */
-
 
     /* 第十一部分：屏幕锁定功能设置。 */
 
@@ -381,13 +366,12 @@ void settings_init(void)
     // 屏幕锁定开关，默认关闭
     settings_add_switch(row, false, &Settings_Screen_Lock);
 
-
     /* 第十三部分：字体大小设置。 */
 
     // 创建字体大小设置行
     row = settings_create_row(panel, "Font Size");
 
-    // 字体大小选项，默认选择 Normal
+    // 字体大小选项，默认下标为 1，对应中等字号
     settings_add_dropdown(row, "Small\nNormal\nLarge",
                           Settings_Font_Size_Index,
                           &Settings_Font_Size_Index);

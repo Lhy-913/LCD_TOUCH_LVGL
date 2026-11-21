@@ -13,18 +13,16 @@ extern uint8_t user_chooser;
 #define User_Operation_Screen_Container_Height 89
 #define User_Selection_Screen_Container_Height 11
 
+#define LINE_COLOR 0x8FE649 // 荧光绿
+#define BACKGROUND_COLOR 0x0B0F14 // 科技黑
+#define Information_Panel 0x202225 // 科技灰
+#define Chart_COLOR 0x22C55E // 图表柱体颜色
 
-#define LINE_COLOR 0x8FE649 //荧光绿
-#define BACKGROUND_COLOR 0x0B0F14 //科技黑
-#define Information_Panel 0x202225 //科技灰
-#define Chart_COLOR 0x22C55E //图表柱体颜色
-
-#define Change_Start_Btn_COLOR 0x22C55E //启动按钮颜色
-#define Change_Pause_Btn_COLOR 0x64748B //暂停按钮颜色
-
+#define Change_Start_Btn_COLOR 0x22C55E // 启动按钮颜色
+#define Change_Pause_Btn_COLOR 0x64748B // 暂停按钮颜色
 
 /* 函数声明 */
 void ui_create(void);
-void General_UI_Properties(lv_obj_t * obj);//常规UI属性设置（禁止滚动显示，去圆角、边框、内边距）
+void General_UI_Properties(lv_obj_t *obj); // 清除边框、圆角和内边距，隐藏滚动条
 
 #endif

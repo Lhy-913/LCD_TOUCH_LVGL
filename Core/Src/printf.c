@@ -5,7 +5,8 @@
 #if defined(__CC_ARM) && !defined(__MICROLIB)
 #pragma import(__use_no_semihosting)
 
-struct __FILE {
+struct __FILE
+{
     int handle;
 };
 FILE __stdout;
@@ -25,7 +26,8 @@ void _ttywrch(int ch)
 void _sys_exit(int status)
 {
     (void)status;
-    while (1) {
+    while (1)
+    {
     }
 }
 #endif
@@ -34,7 +36,8 @@ int fputc(int ch, FILE *f)
 {
     uint8_t data = (uint8_t)ch;
     (void)f;
-    if (HAL_UART_Transmit(&UART_PRINTF_HANDLE, &data, 1, HAL_MAX_DELAY) != HAL_OK) {
+    if (HAL_UART_Transmit(&UART_PRINTF_HANDLE, &data, 1, HAL_MAX_DELAY) != HAL_OK)
+    {
         return EOF;
     }
     return ch;
@@ -48,14 +51,17 @@ int uart_printf(const char *format, ...)
     int length = vsnprintf(buffer, sizeof(buffer), format, args);
     va_end(args);
 
-    if (length < 0) {
+    if (length < 0)
+    {
         return -1;
     }
-    if (length >= (int)sizeof(buffer)) {
+    if (length >= (int)sizeof(buffer))
+    {
         length = (int)sizeof(buffer) - 1;
     }
     if (length > 0 && HAL_UART_Transmit(&UART_PRINTF_HANDLE, (uint8_t *)buffer,
-                                       (uint16_t)length, HAL_MAX_DELAY) != HAL_OK) {
+                                        (uint16_t)length, HAL_MAX_DELAY) != HAL_OK)
+    {
         return -1;
     }
     return length;
