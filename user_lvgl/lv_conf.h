@@ -512,7 +512,7 @@
 #endif /*LV_USE_PPA*/
 
 /** Accelerate blends, fills, image decoding, etc. with STM32 DMA2D. */
-#define LV_USE_DRAW_DMA2D DMA2D_choose
+#define LV_USE_DRAW_DMA2D 1
 
 #if LV_USE_DRAW_DMA2D
 /** the header file for LVGL to include for DMA2D */

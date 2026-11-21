@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "can.h"
 #include "dma.h"
 #include "dma2d.h"
 #include "tim.h"
@@ -30,12 +31,19 @@
 #include "lcd.h"
 #include "touch.h"
 #include "delay.h"
+#include "CAN_To_BMS.h"
+#include "printf.h"
+
+#include <string.h>
 
 #include "lv_port_disp.h"
 #include "lv_port_indev.h"
 #include "lvgl/lvgl.h"
 #include "lv_demos.h"
+
 #include "ui.h"
+#include "Charging_Status.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -105,9 +113,11 @@ int main(void)
   MX_FMC_Init();
   MX_DMA2D_Init();
   MX_TIM3_Init();
+  MX_CAN1_Init();
   /* USER CODE BEGIN 2 */
+    Can_User_Filter_Init();  
 // 若需要使用dma2d优化，将main中的dma2d初始化注释，开启lv_conf中的dma2d即可，否则会冲突
-  HAL_TIM_Base_Start_IT(&htim6);
+    HAL_TIM_Base_Start_IT(&htim6);
 
    HAL_Delay(150); // NT35510手册中写明内部电池上电后需等待120ms才使用，这里做了冗余
    uint8_t lvgl_choose = 1;    // 0 测试   1 lvgl
@@ -118,7 +128,6 @@ if(!lvgl_choose)
 {
   LCD_init(); 
   GT1151_init();
-  lcd_text();
 }
 else
 {
@@ -137,6 +146,14 @@ else
 }
   HAL_TIM_PWM_Start(&htim3,TIM_CHANNEL_2);//开启背光引脚的pwm
 
+//测试
+
+extern  bool is_charging; // 初始状态为充电中
+const uint32_t can_status_period_ms = 1000U;
+uint32_t last_can_status_tick = HAL_GetTick() - can_status_period_ms;
+bool last_can_status = is_charging;
+
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -144,7 +161,30 @@ else
   while (1)
   {
       
-    if(lvgl_choose) lv_timer_handler();
+    while(lvgl_choose)
+    {
+        Can_Get_BMS_Message();
+        if (Chart_Update_Start)
+        {
+            Chart_Update_Start = false;
+            if (!stress_choose) Charging_Status_Update();
+        }
+            
+        //IGT6 Send Commnd to Bms
+        uint32_t now = HAL_GetTick();
+        if (is_charging != last_can_status || now - last_can_status_tick >= can_status_period_ms)
+        {
+            uint8_t command = is_charging;
+            Can_send_message(Adjust_Charging_Status, &command, sizeof(command));
+            last_can_status = is_charging;
+            last_can_status_tick = now;
+        }
+        
+        lv_timer_handler();
+        __WFI();
+    }
+
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

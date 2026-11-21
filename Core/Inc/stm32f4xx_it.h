@@ -36,6 +36,10 @@ extern "C" {
 /* USER CODE BEGIN ET */
 extern volatile uint16_t sleep_time;
 extern volatile bool lcd_sleep_flag;
+extern volatile uint32_t lcd_sleep_time;
+extern volatile uint32_t lcd_sleep_Choose;
+
+
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/

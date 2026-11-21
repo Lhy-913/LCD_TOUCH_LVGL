@@ -254,6 +254,7 @@ touch_lcd_lvgl\settings.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_ext
 touch_lcd_lvgl\settings.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_dma.h
 touch_lcd_lvgl\settings.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_dma_ex.h
 touch_lcd_lvgl\settings.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_cortex.h
+touch_lcd_lvgl\settings.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_can.h
 touch_lcd_lvgl\settings.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_dma2d.h
 touch_lcd_lvgl\settings.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash.h
 touch_lcd_lvgl\settings.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash_ex.h
@@ -265,3 +266,4 @@ touch_lcd_lvgl\settings.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr
 touch_lcd_lvgl\settings.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h
 touch_lcd_lvgl\settings.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h
 touch_lcd_lvgl\settings.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h
+touch_lcd_lvgl\settings.o: ../Core/Inc/stm32f4xx_it.h

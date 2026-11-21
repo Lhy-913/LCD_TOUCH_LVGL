@@ -34,12 +34,12 @@ LV_EXPORT_CONST_INT(LV_CHART_POINT_NONE);
  * Chart types
  */
 typedef enum {
-    LV_CHART_TYPE_NONE,     /**< Don't draw the series*/
-    LV_CHART_TYPE_LINE,     /**< Connect the points with lines*/
-    LV_CHART_TYPE_CURVE,    /**< Connect the points with curves*/
-    LV_CHART_TYPE_BAR,      /**< Draw bars for each series*/
-    LV_CHART_TYPE_STACKED,  /**< Draw a single stacked bar for each data point. Supports only positive values*/
-    LV_CHART_TYPE_SCATTER,  /**< Draw points and lines in 2D (x,y coordinates)*/
+    LV_CHART_TYPE_NONE,     /**< 不绘制数据系列 */
+    LV_CHART_TYPE_LINE,     /**< 使用直线连接各个数据点 */
+    LV_CHART_TYPE_CURVE,    /**< 使用曲线连接各个数据点 */
+    LV_CHART_TYPE_BAR,      /**< 为每个数据系列绘制柱状图 */
+    LV_CHART_TYPE_STACKED,  /**< 每个数据点绘制一个堆叠柱状图，仅支持正数值 */
+    LV_CHART_TYPE_SCATTER,  /**< 在二维坐标系中绘制点和线（X、Y 坐标） */
 } lv_chart_type_t;
 
 /**

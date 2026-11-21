@@ -23,6 +23,7 @@ touch_lcd_lvgl\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_exti.h
 touch_lcd_lvgl\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_dma.h
 touch_lcd_lvgl\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_dma_ex.h
 touch_lcd_lvgl\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_cortex.h
+touch_lcd_lvgl\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_can.h
 touch_lcd_lvgl\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_dma2d.h
 touch_lcd_lvgl\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash.h
 touch_lcd_lvgl\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash_ex.h
@@ -34,6 +35,7 @@ touch_lcd_lvgl\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.
 touch_lcd_lvgl\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h
 touch_lcd_lvgl\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h
 touch_lcd_lvgl\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h
+touch_lcd_lvgl\main.o: ../Core/Inc/can.h
 touch_lcd_lvgl\main.o: ../Core/Inc/dma.h
 touch_lcd_lvgl\main.o: ../Core/Inc/dma2d.h
 touch_lcd_lvgl\main.o: ../Core/Inc/tim.h
@@ -44,6 +46,10 @@ touch_lcd_lvgl\main.o: ../Core/Inc/lcd.h
 touch_lcd_lvgl\main.o: D:\Keil5_MDK__For_STM32_cubeMX\Core\ARM\ARMCC\Bin\..\include\stdbool.h
 touch_lcd_lvgl\main.o: ../Core/Inc/touch.h
 touch_lcd_lvgl\main.o: ../Core/Inc/delay.h
+touch_lcd_lvgl\main.o: ../Core/Inc/CAN_To_BMS.h
+touch_lcd_lvgl\main.o: ../Core/Inc/printf.h
+touch_lcd_lvgl\main.o: D:\Keil5_MDK__For_STM32_cubeMX\Core\ARM\ARMCC\Bin\..\include\stdio.h
+touch_lcd_lvgl\main.o: D:\Keil5_MDK__For_STM32_cubeMX\Core\ARM\ARMCC\Bin\..\include\string.h
 touch_lcd_lvgl\main.o: ../user_lvgl/lvgl/lv_port_disp.h
 touch_lcd_lvgl\main.o: ../user_lvgl/lvgl/lvgl.h
 touch_lcd_lvgl\main.o: ../user_lvgl/lvgl/include/lvgl/lvgl.h
@@ -262,7 +268,6 @@ touch_lcd_lvgl\main.o: ../user_lvgl/lvgl/include/lvgl/widgets/lv_table.h
 touch_lcd_lvgl\main.o: ../user_lvgl/lvgl/include/lvgl/widgets/lv_tabview.h
 touch_lcd_lvgl\main.o: ../user_lvgl/lvgl/include/lvgl/widgets/lv_tileview.h
 touch_lcd_lvgl\main.o: ../user_lvgl/lvgl/include/lvgl/widgets/lv_win.h
-touch_lcd_lvgl\main.o: D:\Keil5_MDK__For_STM32_cubeMX\Core\ARM\ARMCC\Bin\..\include\stdio.h
 touch_lcd_lvgl\main.o: ../user_lvgl/lvgl/include/lvgl/api_map/lv_api_map_v8.h
 touch_lcd_lvgl\main.o: ../user_lvgl/lvgl/include/lvgl/api_map/lv_api_map_v9_0.h
 touch_lcd_lvgl\main.o: ../user_lvgl/lvgl/include/lvgl/api_map/lv_api_map_v9_1.h
@@ -277,4 +282,6 @@ touch_lcd_lvgl\main.o: ../user_lvgl/lvgl/demos/lv_demos.h
 touch_lcd_lvgl\main.o: ../user_lvgl/lvgl/demos/stress/lv_demo_stress.h
 touch_lcd_lvgl\main.o: ../user_lvgl/lvgl/demos/stress/../lv_demos.h
 touch_lcd_lvgl\main.o: ../user_lvgl/lvgl/User_ui/ui.h
+touch_lcd_lvgl\main.o: ../user_lvgl/lvgl/lvgl.h
+touch_lcd_lvgl\main.o: ../user_lvgl/lvgl/User_ui/Charging_Status.h
 touch_lcd_lvgl\main.o: ../user_lvgl/lvgl/lvgl.h

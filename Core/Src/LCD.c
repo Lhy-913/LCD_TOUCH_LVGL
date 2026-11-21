@@ -7,100 +7,99 @@
 
 #include "lvgl/lvgl.h"
 
-//引用DMA句柄
+// 引用DMA句柄
 extern DMA_HandleTypeDef hdma_memtomem_dma2_stream0;
 extern DMA_HandleTypeDef hdma_memtomem_dma2_stream1;
 
 extern UART_HandleTypeDef huart1;
 
-
-static uint16_t *src = NULL;//对接lvgl的画面数据指针
-volatile uint8_t bring_now = 100;//初始亮度值
-//总数据量和dma剩余处理数量
+static uint16_t *src = NULL; // 对接lvgl的画面数据指针
+volatile uint8_t bring_now = 100; // 当前背光亮度，初始为 100，由设置页回调更新
+// 本次 DMA 传输长度和剩余像素数
 uint32_t len = 0;
 uint32_t DMAremain = 0;
 
 /*       屏幕        */
-void lcd_wr_regno(uint16_t cmd)//写命令
+void lcd_wr_regno(uint16_t cmd) // 写命令
 {
-//    cmd = cmd;//02优化速度时候得加点延时让地址自增完成
+    //    cmd = cmd;//02优化速度时候得加点延时让地址自增完成
     LCD->LCD_CMD = cmd;
 }
 
-void lcd_wr_data(uint16_t data)//写数据
+void lcd_wr_data(uint16_t data) // 写数据
 {
-//    data = data;
+    //    data = data;
     LCD->LCD_DATA = data;
 }
 
-void lcd_write_reg(uint16_t cmd,uint16_t data)//写入一次命令和数据
+void lcd_write_reg(uint16_t cmd, uint16_t data) // 写入一次命令和数据
 {
-    LCD->LCD_CMD  = cmd;
+    LCD->LCD_CMD = cmd;
     LCD->LCD_DATA = data;
 }
 
-void LCD_init(void)//NT35510初始化
-{   
+void LCD_init(void) //NT35510初始化
+{
     lcd_write_reg(0xF000, 0x55);
     lcd_write_reg(0xF001, 0xAA);
     lcd_write_reg(0xF002, 0x52);
     lcd_write_reg(0xF003, 0x08);
     lcd_write_reg(0xF004, 0x01);
-    
-    /* AVDD Set AVDD 5.2V */
+
+    /* 设置 AVDD 为 5.2 V */
     lcd_write_reg(0xB000, 0x0D);
     lcd_write_reg(0xB001, 0x0D);
     lcd_write_reg(0xB002, 0x0D);
-    /* AVDD ratio */
+    /* 设置 AVDD 倍率 */
     lcd_write_reg(0xB600, 0x34);
     lcd_write_reg(0xB601, 0x34);
     lcd_write_reg(0xB602, 0x34);
-    /* AVEE -5.2V */
+    /* 设置 AVEE 为 -5.2 V */
     lcd_write_reg(0xB100, 0x0D);
     lcd_write_reg(0xB101, 0x0D);
     lcd_write_reg(0xB102, 0x0D);
-    /* AVEE ratio */
+    /* 设置 AVEE 倍率 */
     lcd_write_reg(0xB700, 0x34);
     lcd_write_reg(0xB701, 0x34);
     lcd_write_reg(0xB702, 0x34);
-    /* VCL -2.5V */
+    /* 设置 VCL 为 -2.5 V */
     lcd_write_reg(0xB200, 0x00);
     lcd_write_reg(0xB201, 0x00);
     lcd_write_reg(0xB202, 0x00);
-    /* VCL ratio */
+    /* 设置 VCL 倍率 */
     lcd_write_reg(0xB800, 0x24);
     lcd_write_reg(0xB801, 0x24);
     lcd_write_reg(0xB802, 0x24);
-    /* VGH 15V (Free pump) */
+    /* 设置 VGH 为 15 V，使用自由升压模式 */
     lcd_write_reg(0xBF00, 0x01);
     lcd_write_reg(0xB300, 0x0F);
     lcd_write_reg(0xB301, 0x0F);
     lcd_write_reg(0xB302, 0x0F);
-    /* VGH ratio */
+    /* 设置 VGH 倍率 */
     lcd_write_reg(0xB900, 0x34);
     lcd_write_reg(0xB901, 0x34);
     lcd_write_reg(0xB902, 0x34);
-    /* VGL_REG -10V */
+    /* 设置 VGL_REG 为 -10 V */
     lcd_write_reg(0xB500, 0x08);
     lcd_write_reg(0xB501, 0x08);
     lcd_write_reg(0xB502, 0x08);
     lcd_write_reg(0xC200, 0x03);
-    /* VGLX ratio */
+    /* 设置 VGLX 倍率 */
     lcd_write_reg(0xBA00, 0x24);
     lcd_write_reg(0xBA01, 0x24);
     lcd_write_reg(0xBA02, 0x24);
-    /* VGMP/VGSP 4.5V/0V */
+    /* 设置 VGMP 和 VGSP 分别为 4.5 V 和 0 V */
     lcd_write_reg(0xBC00, 0x00);
     lcd_write_reg(0xBC01, 0x78);
     lcd_write_reg(0xBC02, 0x00);
-    /* VGMN/VGSN -4.5V/0V */
+    /* 设置 VGMN 和 VGSN 分别为 -4.5 V 和 0 V */
     lcd_write_reg(0xBD00, 0x00);
     lcd_write_reg(0xBD01, 0x78);
     lcd_write_reg(0xBD02, 0x00);
-    /* VCOM */
+    /* 设置公共电极电压 VCOM */
     lcd_write_reg(0xBE00, 0x00);
     lcd_write_reg(0xBE01, 0x64);
-    /* Gamma Setting */
+    /* 设置伽马曲线 */
     lcd_write_reg(0xD100, 0x00);
     lcd_write_reg(0xD101, 0x33);
     lcd_write_reg(0xD102, 0x00);
@@ -418,82 +417,89 @@ void LCD_init(void)//NT35510初始化
     lcd_write_reg(0xD631, 0x33);
     lcd_write_reg(0xD632, 0x03);
     lcd_write_reg(0xD633, 0x6D);
-    /* LV2 Page 0 enable */
+    /* 切换到 LV2 第 0 页寄存器 */
     lcd_write_reg(0xF000, 0x55);
     lcd_write_reg(0xF001, 0xAA);
     lcd_write_reg(0xF002, 0x52);
     lcd_write_reg(0xF003, 0x08);
     lcd_write_reg(0xF004, 0x00);
-    /* Display control */
+    /* 设置显示控制 */
     lcd_write_reg(0xB100, 0xCC);
     lcd_write_reg(0xB101, 0x00);
-    /* Source hold time */
+    /* 设置源极保持时间 */
     lcd_write_reg(0xB600, 0x05);
-    /* Gate EQ control */
+    /* 设置栅极均衡控制 */
     lcd_write_reg(0xB700, 0x70);
     lcd_write_reg(0xB701, 0x70);
-    /* Source EQ control (Mode 2) */
+    /* 设置源极均衡控制为模式 2 */
     lcd_write_reg(0xB800, 0x01);
     lcd_write_reg(0xB801, 0x03);
     lcd_write_reg(0xB802, 0x03);
     lcd_write_reg(0xB803, 0x03);
-    /* Inversion mode (2-dot) */
+    /* 设置两点反转模式 */
     lcd_write_reg(0xBC00, 0x02);
     lcd_write_reg(0xBC01, 0x00);
     lcd_write_reg(0xBC02, 0x00);
-    /* Timing control 4H w/ 4-delay */
+    /* 设置 4H 时序和 4 级延迟 */
     lcd_write_reg(0xC900, 0xD0);
     lcd_write_reg(0xC901, 0x02);
     lcd_write_reg(0xC902, 0x50);
     lcd_write_reg(0xC903, 0x50);
     lcd_write_reg(0xC904, 0x50);
     lcd_write_reg(0x3500, 0x00);
-    lcd_write_reg(0x3A00, 0x05); /* 16-bit/pixel */
+    lcd_write_reg(0x3A00, 0x05); /* 每像素 16 位 */
     lcd_wr_regno(0x1100);
-    
+
     HAL_Delay(120);
     lcd_wr_regno(0x2900);
     lcd_clear(BLACK);
 }
 
-bool Lcd_Scan_Line_Check(void)//扫描线检查
-{    
+bool Lcd_Scan_Line_Check(void) // 扫描线检查
+{
     lcd_wr_regno(0x4500);
     uint16_t LCD_scan_line = LCD->LCD_DATA;
     lcd_wr_regno(0x4501);
     LCD_scan_line = LCD_scan_line << 8 | (LCD->LCD_DATA);
-    
-    if(LCD_scan_line > 630 && LCD_scan_line < 640)return true;
-    
+
+    if (LCD_scan_line > 630 && LCD_scan_line < 640)
+        return true;
+
     return false;
 }
 
-void lcd_show_lvgl(uint16_t x,uint16_t y,uint16_t OVER_X,uint16_t OVER_Y,uint16_t *Buf_Color)//打点函数
+void lcd_show_lvgl(uint16_t x, uint16_t y, uint16_t OVER_X, uint16_t OVER_Y, uint16_t *Buf_Color) // 逐像素刷新指定区域
 {
-    lcd_set_cursor(x,y,OVER_X,OVER_Y);  
-    if(Tear_Reduction)while(!Lcd_Scan_Line_Check()){}    
+    lcd_set_cursor(x, y, OVER_X, OVER_Y);
+    if (Tear_Reduction)
+        while (!Lcd_Scan_Line_Check())
+        {
+        }
     lcd_wr_regno(0x2C00);
-    for(uint32_t i = 0; i < (OVER_X - x+1)*(OVER_Y - y+1); i++)//这里的+1在使用LVGL时候必须加，不然会出现全屏规则排列的横线
+    for (uint32_t i = 0; i < (OVER_X - x + 1) * (OVER_Y - y + 1); i++) // LVGL 的刷新区域包含起止坐标，宽高都要加 1
     {
         LCD->LCD_DATA = *Buf_Color++;
     }
 }
 
-void lcd_dmashow_lvgl(uint16_t x, uint16_t y, uint16_t OVER_X, uint16_t OVER_Y, uint16_t *Buf_Color)//DMA打点函数
+void lcd_dmashow_lvgl(uint16_t x, uint16_t y, uint16_t OVER_X, uint16_t OVER_Y, uint16_t *Buf_Color) // 使用 DMA 刷新指定区域
 {
     src = Buf_Color;
     lcd_set_cursor(x, y, OVER_X, OVER_Y);
     DMAremain = (uint32_t)(OVER_X - x + 1) * (OVER_Y - y + 1);
-    
-    if(Tear_Reduction)while(!Lcd_Scan_Line_Check()){}
+
+    if (Tear_Reduction)
+        while (!Lcd_Scan_Line_Check())
+        {
+        }
 
     lcd_wr_regno(0x2C00);
     lcd_dma_send_chunk();
 }
 
-static void lcd_dma_send_chunk(void)//DMA传输
-{    
-        
+static void lcd_dma_send_chunk(void) //DMA传输
+{
+
     len = (DMAremain > 65535) ? 65535 : DMAremain;
     HAL_DMA_Start_IT(&hdma_memtomem_dma2_stream0,
                      (uint32_t)src,
@@ -501,202 +507,204 @@ static void lcd_dma_send_chunk(void)//DMA传输
                      len);
     src += len;
 }
-extern lv_display_t * disp;
-void XferCpltCallback(DMA_HandleTypeDef *hdma)//DMA回调函数
+extern lv_display_t *disp;
+void XferCpltCallback(DMA_HandleTypeDef *hdma) //DMA回调函数
 {
     DMAremain -= len;
-    if (hdma == &hdma_memtomem_dma2_stream0) 
+    if (hdma == &hdma_memtomem_dma2_stream0)
     {
-        if(DMAremain) lcd_dma_send_chunk();     // DMA续杯
-        else lv_display_flush_ready(disp);
+        if (DMAremain)
+            lcd_dma_send_chunk(); // 继续传输下一批像素
+        else
+            lv_display_flush_ready(disp);
     }
 }
 
-void lcd_clear(uint32_t color)//清屏
+void lcd_clear(uint32_t color) // 清屏
 {
     lcd_set_start_cursor(0, 0);
     lcd_wr_regno(0x2C00);
-    for(uint32_t i = 0; i < 480*800; i++)
+    for (uint32_t i = 0; i < 480 * 800; i++)
     {
         LCD->LCD_DATA = color;
     }
 }
 
-void lcd_set_start_cursor(uint16_t x,uint16_t y)//设置起始光标
+void lcd_set_start_cursor(uint16_t x, uint16_t y) // 设置起始光标
 {
-    lcd_wr_regno(0x2A00);   
-        lcd_wr_data(x>>8);
-    lcd_wr_regno(0x2A01);   
-        lcd_wr_data(x&0xFF);
-    lcd_wr_regno(0x2B00);   
-        lcd_wr_data(y>>8);
-    lcd_wr_regno(0x2B01);   
-        lcd_wr_data(y&0xFF);
+    lcd_wr_regno(0x2A00);
+    lcd_wr_data(x >> 8);
+    lcd_wr_regno(0x2A01);
+    lcd_wr_data(x & 0xFF);
+    lcd_wr_regno(0x2B00);
+    lcd_wr_data(y >> 8);
+    lcd_wr_regno(0x2B01);
+    lcd_wr_data(y & 0xFF);
 }
 
-void lcd_set_cursor(uint16_t x,uint16_t y,uint16_t xOver,uint16_t yOver)//设置完整光标边界
+void lcd_set_cursor(uint16_t x, uint16_t y, uint16_t xOver, uint16_t yOver) // 设置完整光标边界
 {
-//    xOver -= 1;//数值从0开始计数，需减一（使用LVGL时候需注释，会影响）
-//    yOver -= 1;
+    //    xOver -= 1;//数值从0开始计数，需减一（使用LVGL时候需注释，会影响）
+    //    yOver -= 1;
 
     lcd_write_reg(0x2A00, x >> 8);
     lcd_write_reg(0x2A01, x & 0xFF);
     lcd_write_reg(0x2A02, xOver >> 8);
     lcd_write_reg(0x2A03, xOver & 0xFF);
-    
+
     lcd_write_reg(0x2B00, y >> 8);
     lcd_write_reg(0x2B01, y & 0xFF);
     lcd_write_reg(0x2B02, yOver >> 8);
     lcd_write_reg(0x2B03, yOver & 0xFF);
 }
 
-void lcd_set_point(uint16_t x,uint16_t y,uint32_t color)//画点
+void lcd_set_point(uint16_t x, uint16_t y, uint32_t color) // 画点
 {
-    lcd_set_start_cursor(x,y);
+    lcd_set_start_cursor(x, y);
     lcd_wr_regno(0x2C00);
     LCD->LCD_DATA = color;
 }
 
-void lcd_Draw_Line(bool Direction,uint16_t Start,uint16_t Over,uint16_t Start_Column,uint32_t color)//画线
+void lcd_Draw_Line(bool Direction, uint16_t Start, uint16_t Over, uint16_t Start_Column, uint32_t color) // 画线
 {
-    if(!Direction)//x轴画线
+    if (!Direction) //x轴画线
     {
         lcd_write_reg(0x2A00, Start >> 8);
         lcd_write_reg(0x2A01, Start & 0xFF);
         lcd_write_reg(0x2A02, Over >> 8);
         lcd_write_reg(0x2A03, Over & 0xFF);
-        
+
         lcd_write_reg(0x2B00, Start_Column >> 8);
         lcd_write_reg(0x2B01, Start_Column & 0xFF);
     }
-    else if(Direction)//y轴画线
+    else if (Direction) //y轴画线
     {
         lcd_write_reg(0x2B00, Start >> 8);
         lcd_write_reg(0x2B01, Start & 0xFF);
         lcd_write_reg(0x2B02, Over >> 8);
         lcd_write_reg(0x2B03, Over & 0xFF);
-        
-        lcd_write_reg(0x2A00,  Start_Column >> 8);
-        lcd_write_reg(0x2A01,  Start_Column & 0xFF);
+
+        lcd_write_reg(0x2A00, Start_Column >> 8);
+        lcd_write_reg(0x2A01, Start_Column & 0xFF);
         lcd_write_reg(0x2A02, (Start_Column + 1) >> 8);
         lcd_write_reg(0x2A03, (Start_Column + 1) & 0xFF);
     }
-     
+
     lcd_wr_regno(0x2C00);
-    for(uint16_t i=0;i<Over-Start;i++)
+    for (uint16_t i = 0; i < Over - Start; i++)
     {
-     LCD->LCD_DATA = color;
+        LCD->LCD_DATA = color;
     }
 }
 
 void lcd_display_dir(bool Screen_Orientation, bool Vertical_Flip)
 {
     lcd_write_reg(0x3600,
-        Screen_Orientation ? (Vertical_Flip ? 0x22 : 0x21) : (Vertical_Flip ? 0x03 : 0x00));
+                  Screen_Orientation ? (Vertical_Flip ? 0x22 : 0x21) : (Vertical_Flip ? 0x03 : 0x00));
 
-    lcd_set_cursor(0, 0, 
-    (Screen_Orientation ? 800 : 480), (Screen_Orientation ? 480 : 800));
+    lcd_set_cursor(0, 0,
+                   (Screen_Orientation ? 800 : 480), (Screen_Orientation ? 480 : 800));
 }
 
-void LCD_Brightness(uint8_t time)//LCD亮度设置
+void LCD_Brightness(uint8_t time) //LCD亮度设置
 {
-    if(time > 100)time = 100;
-    else if(time < 20)time = 20;
+    if (time > 100)
+        time = 100;
+    else if (time < 20)
+        time = 20;
 
     __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, time);
 }
 
-
 void lcd_text(void)
 {
-//LCD_Brightness(10);
-    //以下测试
-    
-    
-//    lcd_Draw_Line(1,0,480,100,BLACK);
-    
-    for(;;) //刷屏
+    //LCD_Brightness(10);
+    // 以下测试
+
+    //    lcd_Draw_Line(1,0,480,100,BLACK);
+
+    for (;;) // 刷屏
     {
-lcd_clear(BROWN);
-HAL_Delay(500);
-lcd_clear(BRRED);
-HAL_Delay(500);
-lcd_clear(GRAY);
-HAL_Delay(500);
-lcd_clear(DARKBLUE);
-HAL_Delay(500);
-lcd_clear(LIGHTBLUE);
-HAL_Delay(500);
-lcd_clear(GRAYBLUE);
-HAL_Delay(500);
-lcd_clear(LIGHTGREEN);
-HAL_Delay(500);
-lcd_clear(LGRAY);
-HAL_Delay(500);
-lcd_clear(LGRAYBLUE);
-HAL_Delay(500);
-lcd_clear(LBBLUE);
-HAL_Delay(500);
-lcd_clear(YELLOW);
-HAL_Delay(500);
+        lcd_clear(BROWN);
+        HAL_Delay(500);
+        lcd_clear(BRRED);
+        HAL_Delay(500);
+        lcd_clear(GRAY);
+        HAL_Delay(500);
+        lcd_clear(DARKBLUE);
+        HAL_Delay(500);
+        lcd_clear(LIGHTBLUE);
+        HAL_Delay(500);
+        lcd_clear(GRAYBLUE);
+        HAL_Delay(500);
+        lcd_clear(LIGHTGREEN);
+        HAL_Delay(500);
+        lcd_clear(LGRAY);
+        HAL_Delay(500);
+        lcd_clear(LGRAYBLUE);
+        HAL_Delay(500);
+        lcd_clear(LBBLUE);
+        HAL_Delay(500);
+        lcd_clear(YELLOW);
+        HAL_Delay(500);
     }
 
-//测量扫描一行的时间以及每次扫描偏移的行数。  当前结果是：每37us获得一次扫描行，每次偏移平均数为180行
-//    CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
-//    DWT->CYCCNT = 0;
-//    DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
+    // 测量扫描一行的时间以及每次扫描偏移的行数。  当前结果是：每37us获得一次扫描行，每次偏移平均数为180行
+    //    CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+    //    DWT->CYCCNT = 0;
+    //    DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
 
-//uint16_t LCD_scan_line;
-//uint16_t last_line = 0;
-//uint32_t last_tick = 0;
-//uint32_t now_tick;
-//uint32_t delta;
-//uint32_t line_count = 0;
-//uint64_t total_ticks = 0;
+    //uint16_t LCD_scan_line;
+    //uint16_t last_line = 0;
+    //uint32_t last_tick = 0;
+    //uint32_t now_tick;
+    //uint32_t delta;
+    //uint32_t line_count = 0;
+    //uint64_t total_ticks = 0;
 
-//char uart_buf[64];
-//int len;
-//while(1)
-//{
-//    lcd_wr_regno(0x4500);
-//    LCD_scan_line = LCD->LCD_DATA;
+    //char uart_buf[64];
+    //int len;
+    //while(1)
+    //{
+    //    lcd_wr_regno(0x4500);
+    //    LCD_scan_line = LCD->LCD_DATA;
 
-//    lcd_wr_regno(0x4501);
-//    LCD_scan_line = LCD_scan_line << 8 | (LCD->LCD_DATA);
+    //    lcd_wr_regno(0x4501);
+    //    LCD_scan_line = LCD_scan_line << 8 | (LCD->LCD_DATA);
 
-//    now_tick = DWT->CYCCNT;
+    //    now_tick = DWT->CYCCNT;
 
-//    if(LCD_scan_line != last_line)
-//    {
-//        if(last_line != 0)
-//        {
-//            delta = now_tick - last_tick;
+    //    if(LCD_scan_line != last_line)
+    //    {
+    //        if(last_line != 0)
+    //        {
+    //            delta = now_tick - last_tick;
 
-//            total_ticks += delta;
-//            line_count++;
+    //            total_ticks += delta;
+    //            line_count++;
 
-//            if(line_count >= 100)
-//            {
-//                uint32_t avg_ticks = total_ticks / line_count;
-//                uint32_t avg_us = avg_ticks / (HAL_RCC_GetHCLKFreq() / 1000000U);
+    //            if(line_count >= 100)
+    //            {
+    //                uint32_t avg_ticks = total_ticks / line_count;
+    //                uint32_t avg_us = avg_ticks / (HAL_RCC_GetHCLKFreq() / 1000000U);
 
-//                len = snprintf(uart_buf, sizeof(uart_buf),
-//                               "Line=%04X Avg=%lu us\r\n",
-//                               LCD_scan_line,
-//                               (unsigned long)avg_us);
+    //                len = snprintf(uart_buf, sizeof(uart_buf),
+    //                               "Line=%04X Avg=%lu us\r\n",
+    //                               LCD_scan_line,
+    //                               (unsigned long)avg_us);
 
-//                HAL_UART_Transmit(&huart1,
-//                                  (uint8_t *)uart_buf,
-//                                  len,
-//                                  HAL_MAX_DELAY);
+    //                HAL_UART_Transmit(&huart1,
+    //                                  (uint8_t *)uart_buf,
+    //                                  len,
+    //                                  HAL_MAX_DELAY);
 
-//                line_count = 0;
-//                total_ticks = 0;
-//            }
-//        }
+    //                line_count = 0;
+    //                total_ticks = 0;
+    //            }
+    //        }
 
-//        last_line = LCD_scan_line;
-//        last_tick = now_tick;
-//    }
-//}
+    //        last_line = LCD_scan_line;
+    //        last_tick = now_tick;
+    //    }
+    //}
 }
