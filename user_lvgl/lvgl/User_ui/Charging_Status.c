@@ -8,7 +8,7 @@ uint16_t Charging_POWER_Kw = 0;//充电功率
 uint16_t Charging_MAX_Kw = 0;//图表显示的最大功率
 uint16_t Charging_Time_Minutes = 0;//充电剩余时间
 
-bool Chart_Update_Start = false; // 开始状态，用于图表刷新开始
+bool Chart_Update_Start = false; // 有新的 BMS 数据待显示
 bool is_charging = false; // 初始状态为充电中
 
 bool Per_Minute_Data = 0;//每x分钟数据 0：x = 1分钟 1：x = 3分钟
@@ -18,28 +18,54 @@ static lv_obj_t *label_time;
 static lv_obj_t *chart_label_top;
 static lv_obj_t *chart_label_mid;
 
-lv_obj_t * Charging_Chart = NULL;//充电状态图表
-lv_chart_series_t * ser = NULL;  //充电状态图表 - 数据序列1
-const float *data = User_Change_message_date.buff;
+static lv_obj_t * Charging_Chart = NULL;//充电状态图表
+static lv_chart_series_t * ser = NULL;  //充电状态图表 - 数据序列1
+
+static void Charging_Chart_Update(void)
+{
+    uint32_t count = lv_chart_get_point_count(Charging_Chart);
+    int32_t *points = lv_chart_get_series_y_array(Charging_Chart, ser);
+    bool changed = false;
+
+    for (uint32_t i = 0; i < count; i++)
+    {
+        int32_t point = (int32_t)User_Change_message_date.buff[i];
+        if (points[i] != point)
+        {
+            points[i] = point;
+            changed = true;
+        }
+    }
+    if (changed) lv_chart_refresh(Charging_Chart);
+}
     
 void Charging_Status_Update(void)//更新充电界面的各状态值
 {
-    Charging_POWER_Kw = PowerReal_x10;
-    Charging_MAX_Kw = User_Change_message_date.Max_Date;
-    Charging_Time_Minutes = Estimated_Charging_Time;
+    uint16_t power = (uint16_t)PowerReal_x10;
+    uint16_t max_power = User_Change_message_date.Max_Date;
 
-    lv_label_set_text_fmt(label_power, "%u kW", Charging_POWER_Kw);
-    lv_label_set_text_fmt(label_time, "%u min", Charging_Time_Minutes);
-
-    lv_label_set_text_fmt(chart_label_top, "%u Kw", Charging_MAX_Kw);
-    lv_label_set_text_fmt(chart_label_mid, "%u Kw", Charging_MAX_Kw / 2);
-    lv_chart_set_axis_range(Charging_Chart, LV_CHART_AXIS_PRIMARY_Y,
-                            0, Charging_MAX_Kw);
+    if (Charging_POWER_Kw != power)
+    {
+        Charging_POWER_Kw = power;
+        lv_label_set_text_fmt(label_power, "%u kW", Charging_POWER_Kw);
+    }
+    if (Charging_Time_Minutes != Estimated_Charging_Time)
+    {
+        Charging_Time_Minutes = Estimated_Charging_Time;
+        lv_label_set_text_fmt(label_time, "%u min", Charging_Time_Minutes);
+    }
+    if (Charging_MAX_Kw != max_power)
+    {
+        Charging_MAX_Kw = max_power;
+        lv_label_set_text_fmt(chart_label_top, "%u Kw", Charging_MAX_Kw);
+        lv_label_set_text_fmt(chart_label_mid, "%u Kw", Charging_MAX_Kw / 2);
+        lv_chart_set_axis_range(Charging_Chart, LV_CHART_AXIS_PRIMARY_Y, 0, Charging_MAX_Kw);
+    }
+    Charging_Chart_Update();
 }
 
 static void Change_Btn_event_cb(lv_event_t * e)//充电状态更改按钮
-{    
-    Chart_Update_Start = 1;
+{
     is_charging = !is_charging;
     lv_obj_t * Change_Btn = lv_event_get_target(e);
     lv_obj_t * Change_Btn_label = lv_obj_get_child(Change_Btn, 0);
@@ -62,7 +88,7 @@ static void Per_Minute_Choose_3min_event_cb(lv_event_t * e)
     lv_obj_set_style_pad_column(Charging_Chart, 1, LV_PART_MAIN);
     lv_chart_set_point_count(Charging_Chart, 30);
 
-    lv_chart_series_t * ser = lv_chart_get_series_next(Charging_Chart, NULL);
+    Charging_Chart_Update();
 
 }
 
@@ -78,12 +104,7 @@ static void Per_Minute_Choose_1min_event_cb(lv_event_t * e)
     lv_obj_set_style_pad_column(Charging_Chart, 18, LV_PART_MAIN);
     lv_chart_set_point_count(Charging_Chart, 15);
 
-    lv_chart_series_t * ser = lv_chart_get_series_next(Charging_Chart, NULL);
-
-    for(uint32_t i = 0; i < 15; i++)
-    {
-        lv_chart_set_series_value_by_id(Charging_Chart, ser, i, data[i]);
-    }
+    Charging_Chart_Update();
 }
 
 static void charging_chart_event_cb(lv_event_t * e)

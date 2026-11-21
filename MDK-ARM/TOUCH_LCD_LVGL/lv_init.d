@@ -265,3 +265,4 @@ touch_lcd_lvgl\lv_init.o: ..\user_lvgl\lvgl\src\indev/lv_indev_private.h
 touch_lcd_lvgl\lv_init.o: ..\user_lvgl\lvgl\src\indev/lv_indev_scroll.h
 touch_lcd_lvgl\lv_init.o: ..\user_lvgl\lvgl\src\fs/lv_fs_private.h
 touch_lcd_lvgl\lv_init.o: ..\user_lvgl\lvgl\src\drivers/wayland/lv_wayland_private.h
+touch_lcd_lvgl\lv_init.o: ..\user_lvgl\lvgl\src\draw/dma2d/lv_draw_dma2d.h

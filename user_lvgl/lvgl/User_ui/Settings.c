@@ -2,24 +2,41 @@
 #include "ui.h"
 #include "lcd.h"
 
+#include "stm32f4xx_it.h"
+
+
 // 设置界面颜色定义
 #define SETTINGS_PANEL_COLOR  0x151B22    // 设置面板背景色
 #define SETTINGS_TEXT_COLOR   0xE6EBF0    // 主要文字颜色
 #define SETTINGS_MUTED_COLOR  0x9AA6B2    // 次级文字颜色
 #define SETTINGS_ACCENT_COLOR 0x4AA8F0    // 强调色
+bool Settings_Brightness_Adaptation = false;       // 亮度自适应开关，false：关闭，true：开启
+uint8_t Settings_Brightness = 100;                 // 当前屏幕亮度，范围 0~100
+uint32_t Sleep_Time_Selected_Index = 0;            // 休眠时间下拉框当前选中索引
+bool Settings_Screen_Saver = true;                 // 屏幕保护功能开关
+bool Settings_Time_Schedule = false;               // 定时功能开关
+uint32_t Settings_Screen_Saver_Type_Index = 0;    // 屏幕保护类型下拉框当前选中索引
+bool Settings_Screen_Lock = false;                 // 屏幕锁定功能开关
+uint32_t Settings_Font_Size_Index = 1;             // 字体大小下拉框当前选中索引
 
 void brightness_event_handler(lv_event_t * e)
 {
-    lv_obj_t * slider = lv_event_get_target(e);
-    bring_now = lv_slider_get_value(slider);// 获取当前滑块值
-
+    lv_obj_t * slider = lv_event_get_target(e);   // 获取触发事件的滑块对象
+    Settings_Brightness = (uint8_t)lv_slider_get_value(slider); // 获取滑块当前数值并更新亮度设置
+    bring_now = Settings_Brightness;              // 同步当前亮度值到实际背光控制变量
 }
 
-void sleeptime_event_handler(lv_event_t * e)
+static void settings_switch_event_handler(lv_event_t * e)
 {
-    lv_obj_t * sleeptime_btn = lv_event_get_target(e);
+    bool *value = (bool *)lv_event_get_user_data(e); // 获取当前开关对应的布尔变量地址
+    *value = lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED); // 获取开关状态并更新对应变量
 }
 
+static void settings_dropdown_event_handler(lv_event_t * e)
+{
+    lcd_sleep_Choose = lv_dropdown_get_selected(lv_event_get_target(e)); // 获取当前选中索引   
+    
+}
 // 创建无背景、无边框、无圆角、无阴影的基础容器
 static lv_obj_t * settings_create_plain(lv_obj_t * parent)
 {
@@ -142,9 +159,13 @@ static lv_obj_t * settings_create_row(lv_obj_t * parent, const char * title)
 
 
 // 创建开关控件，并设置初始状态
-static void settings_add_switch(lv_obj_t * row, bool checked)
+static void settings_add_switch(lv_obj_t * row, bool checked, bool *value)
 {
     lv_obj_t * sw = lv_switch_create(row);
+
+    *value = checked;
+    lv_obj_add_event_cb(sw, settings_switch_event_handler,
+                        LV_EVENT_VALUE_CHANGED, value);
 
     // 开关尺寸
     lv_obj_set_size(sw, 42, 23);
@@ -168,10 +189,12 @@ static void settings_add_switch(lv_obj_t * row, bool checked)
 
 
 // 创建下拉列表并设置选项及默认选中项
-static void settings_add_dropdown(lv_obj_t * row, const char * options,
-                                  uint16_t selected)
+static lv_obj_t * settings_add_dropdown(lv_obj_t * row, const char * options,
+                                        uint32_t selected, uint32_t *value)
 {
     lv_obj_t * dropdown = lv_dropdown_create(row);
+
+    *value = selected;
 
     // 设置下拉选项
     lv_dropdown_set_options(dropdown, options);
@@ -181,6 +204,11 @@ static void settings_add_dropdown(lv_obj_t * row, const char * options,
 
     // 应用统一样式
     settings_style_dropdown(dropdown);
+
+    lv_obj_add_event_cb(dropdown, settings_dropdown_event_handler,
+                        LV_EVENT_VALUE_CHANGED, value);
+
+    return dropdown;
 }
 
 
@@ -269,7 +297,7 @@ void settings_init(void)
     // 创建亮度自适应设置行
     lv_obj_t * row = settings_create_row(panel, "Brightness Adaptation");
     // 创建亮度自适应开关，默认关闭
-    settings_add_switch(row, false);
+    settings_add_switch(row, false, &Settings_Brightness_Adaptation);
 
 
     /* 第五部分：屏幕亮度设置。 */
@@ -287,7 +315,7 @@ void settings_init(void)
 
     // 亮度范围为 0~100，默认最大亮度
     lv_slider_set_range(brightness, 0, 100);
-    lv_slider_set_value(brightness, 100, LV_ANIM_OFF);
+    lv_slider_set_value(brightness, Settings_Brightness, LV_ANIM_OFF);
 
     // 滑块轨道高度
     lv_obj_set_style_height(brightness, 16, LV_PART_MAIN);
@@ -314,19 +342,14 @@ void settings_init(void)
 
     // 创建待机时间设置行
     row = settings_create_row(panel, "Sleep Time");
-    lv_obj_add_event_cb(row, sleeptime_event_handler, LV_EVENT_PRESSED, NULL);
 
     // 待机时间选项，默认选择 1 minute
-    settings_add_dropdown(row, "30 seconds\n1 minute\n5 minutes\n10 minutes", 1);
+    settings_add_dropdown(row,"15 Second\n30 Second\n1 minute\n5 minute",
+                          Sleep_Time_Selected_Index,
+                          &Sleep_Time_Selected_Index);
 
 
     /* 第七部分：屏幕保护时间设置。 */
-
-    // 创建屏幕保护时间设置行
-    row = settings_create_row(panel, "Screen Saver Time");
-
-    // 屏幕保护时间选项，默认选择 30 minutes
-    settings_add_dropdown(row, "1 minute\n5 minutes\n10 minutes\n30 minutes", 3);
 
 
     /* 第八部分：屏幕保护功能设置。 */
@@ -335,7 +358,7 @@ void settings_init(void)
     row = settings_create_row(panel, "Screen Saver");
 
     // 屏幕保护开关，默认开启
-    settings_add_switch(row, true);
+    settings_add_switch(row, true, &Settings_Screen_Saver);
 
 
     /* 第九部分：定时功能设置。 */
@@ -344,16 +367,10 @@ void settings_init(void)
     row = settings_create_row(panel, "Time Schedule");
 
     // 定时功能开关，默认关闭
-    settings_add_switch(row, false);
+    settings_add_switch(row, false, &Settings_Time_Schedule);
 
 
     /* 第十部分：屏幕保护类型设置。 */
-
-    // 创建屏幕保护类型设置行
-    row = settings_create_row(panel, "Screen Saver Type");
-
-    // 屏幕保护类型选项，默认选择 Local Pictures
-    settings_add_dropdown(row, "Local Pictures\nClock\nNone", 0);
 
 
     /* 第十一部分：屏幕锁定功能设置。 */
@@ -362,7 +379,7 @@ void settings_init(void)
     row = settings_create_row(panel, "Screen Lock");
 
     // 屏幕锁定开关，默认关闭
-    settings_add_switch(row, false);
+    settings_add_switch(row, false, &Settings_Screen_Lock);
 
 
     /* 第十三部分：字体大小设置。 */
@@ -371,5 +388,7 @@ void settings_init(void)
     row = settings_create_row(panel, "Font Size");
 
     // 字体大小选项，默认选择 Normal
-    settings_add_dropdown(row, "Small\nNormal\nLarge", 1);
+    settings_add_dropdown(row, "Small\nNormal\nLarge",
+                          Settings_Font_Size_Index,
+                          &Settings_Font_Size_Index);
 }

@@ -71,6 +71,7 @@ void lv_port_disp_init(void)
      * Create a display and set a flush_cb
      * -----------------------------------*/
     disp = lv_display_create(MY_DISP_HOR_RES, MY_DISP_VER_RES);
+    lv_timer_set_period(lv_display_get_refr_timer(disp), 25U);
     lv_display_set_flush_cb(disp, disp_flush);
 
 //    /* Example 1

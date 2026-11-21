@@ -11,7 +11,7 @@ void user_selection_btn_callback(lv_event_t *e)
 
     // 获取当前选择的页面对象,并滚动到该页面
     lv_obj_t *page = lv_obj_get_child(User_Screen, user_chooser);
-    lv_obj_scroll_to_x(User_Screen,lv_obj_get_x(page),LV_ANIM_ON);
+    lv_obj_scroll_to_x(User_Screen,lv_obj_get_x(page),LV_ANIM_OFF);
 }
 void ui_create_user_selection(lv_obj_t * User_Selection_Screen,lv_obj_t * icon1)
 {

@@ -149,6 +149,9 @@ else
 //测试
 
 extern  bool is_charging; // 初始状态为充电中
+const uint32_t can_status_period_ms = 1000U;
+uint32_t last_can_status_tick = HAL_GetTick() - can_status_period_ms;
+bool last_can_status = is_charging;
 
 
   /* USER CODE END 2 */
@@ -161,10 +164,21 @@ extern  bool is_charging; // 初始状态为充电中
     while(lvgl_choose)
     {
         Can_Get_BMS_Message();
-        if(Chart_Update_Start)Charging_Status_Update();
+        if (Chart_Update_Start)
+        {
+            Chart_Update_Start = false;
+            if (!stress_choose) Charging_Status_Update();
+        }
             
         //IGT6 Send Commnd to Bms
-        Can_send_message(Adjust_Charging_Status,(uint8_t*)&is_charging,sizeof(is_charging));
+        uint32_t now = HAL_GetTick();
+        if (is_charging != last_can_status || now - last_can_status_tick >= can_status_period_ms)
+        {
+            uint8_t command = is_charging;
+            Can_send_message(Adjust_Charging_Status, &command, sizeof(command));
+            last_can_status = is_charging;
+            last_can_status_tick = now;
+        }
         
         lv_timer_handler();
         __WFI();

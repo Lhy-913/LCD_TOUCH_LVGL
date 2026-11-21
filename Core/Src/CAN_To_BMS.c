@@ -1,7 +1,6 @@
 #include "CAN_To_BMS.h"
 #include "stm32f4xx.h"
 #include "usart.h"
-#include "printf.h"
 #include <string.h>
 
 #include "Lvgl_Array_Update.h"
@@ -10,11 +9,6 @@
 #include "can.h"
 
 extern bool Per_Minute_Data;
-extern lv_obj_t * Charging_Chart;//充电状态图表
-extern lv_chart_series_t * ser;  //充电状态图表 - 数据序列1
-
-extern const float *data;
-    ;
 uint16_t Estimated_Charging_Time = 0;//剩余充电时间(单位分钟)
 float Soc,PowerReal,PowerReal_x10;//剩余电量，实时功率
 
@@ -24,14 +18,11 @@ CAN_RxHeaderTypeDef BMS_CAN_RxHeader;
 
 BMS_SysModeTypedef IGT6_Send_Chonge_Status_Commond;
 
-
-//soc计算
-
-static bool eta_initialized = false;
-static bool eta_rate_valid = false;
-static float eta_base_soc = 0.0f;
-static float eta_rate_percent_per_min = 0.0f;
-static uint32_t eta_base_tick = 0;
+//soc用
+static bool eta_rate_ready = false;
+static float eta_rate_base_soc = 0.0f;
+static uint32_t eta_rate_base_tick = 0U;
+static float eta_soc_rate_per_min = 0.0f;
 
 
 void Can_send_message(uint32_t id, uint8_t *data, uint8_t length)
@@ -47,17 +38,9 @@ void Can_send_message(uint32_t id, uint8_t *data, uint8_t length)
     if (HAL_CAN_AddTxMessage(&hcan1, &BMS_CAN_TxHeader, data, &TxMailbox) != HAL_OK)
     {
         // 发送失败处理
-        HAL_UART_Transmit(&huart1,(uint8_t*)("send message error!"),sizeof(("send message error!")),HAL_MAX_DELAY);
-        return;
+        static const char error[] = "CAN TX error\r\n";
+        HAL_UART_Transmit(&huart1, (uint8_t *)error, sizeof(error) - 1U, 5U);
     }
-    
-    if (HAL_CAN_GetTxMailboxesFreeLevel(&hcan1) == 0)
-    {
-        HAL_UART_Transmit(&huart1,(uint8_t*)("TxMailboxes is full!"),sizeof(("TxMailboxes is full!")),HAL_MAX_DELAY);
-        return;
-    }
-    uart_printf("AddTxMessage OK!");
-
 }
 void Can_read_FIFO0_message(uint32_t *id, uint8_t *data, uint8_t *length)
 {
@@ -65,14 +48,14 @@ void Can_read_FIFO0_message(uint32_t *id, uint8_t *data, uint8_t *length)
     if (HAL_CAN_GetRxFifoFillLevel(&hcan1, CAN_RX_FIFO0) == 0)
     {
         //没有待接收的报文
-        uart_printf("NO Message!");
         return;
     }
     HAL_Status_Number = HAL_CAN_GetRxMessage(&hcan1, CAN_RX_FIFO0, &BMS_CAN_RxHeader, data);
     if (HAL_Status_Number != HAL_OK)
     {
         // 接收失败处理  
-        uart_printf("Get Message Error! Error_Number is %d",HAL_Status_Number);
+        static const char error[] = "CAN RX error\r\n";
+        HAL_UART_Transmit(&huart1, (uint8_t *)error, sizeof(error) - 1U, 5U);
         return;
     }
     *id = BMS_CAN_RxHeader.StdId;       // 读取标识号
@@ -85,62 +68,63 @@ void Can_Get_BMS_Message(void)
     uint8_t buff[8];
     uint8_t length = 0;
     Can_read_FIFO0_message(&id,buff,&length);
-    if(id == Get_Change_info)
+    if (id == Get_Change_info && length == sizeof(Soc) + sizeof(PowerReal))
     {        
         //将数据完整复制到buff
         memcpy(&Soc,buff,sizeof(float));
         memcpy(&PowerReal,buff+4,sizeof(float));
         PowerReal_x10 = PowerReal*10;
-        //打印充电状态数据
-        uart_printf("Rx_id: %lu  SOC: %.2f  PowerReal: %.2f W\r\n",
-                    (unsigned long)id,
-                    Soc,
-                    PowerReal);
-                    
-        uint32_t now = HAL_GetTick();
+uint32_t now = HAL_GetTick();
 
-if (!eta_initialized)
-{
-    eta_base_soc = Soc;          // Soc 的单位是百分比，范围 0～100
-    eta_base_tick = now;
-    eta_initialized = true;
-}
-else if ((uint32_t)(now - eta_base_tick) >= 300000U) // 5 分钟
-{
-    uint32_t elapsed_ms = now - eta_base_tick;
-    eta_rate_percent_per_min =
-        (Soc - eta_base_soc) * 60000.0f / elapsed_ms;
-
-    eta_rate_valid = (eta_rate_percent_per_min > 0.01f);
-    eta_base_soc = Soc;
-    eta_base_tick = now;
-}
-
-if (Soc >= 100.0f)
+if (PowerReal <= 0.5f || Soc >= 100.0f)
 {
     Estimated_Charging_Time = 0;
-}
-else if (eta_rate_valid)
-{
-    float minutes_left = (100.0f - Soc) / eta_rate_percent_per_min;
-    Estimated_Charging_Time = (uint16_t)(minutes_left + 0.5f);
-}
-else if (PowerReal > 0.5f) // 最近 5 分钟尚未测出有效 SOC 增长率时
-{
-    Estimated_Charging_Time =
-        (uint16_t)(((Battery_Capacity_Ah * Nominal_Voltage) *
-        (1.0f - Soc / 100.0f) / PowerReal * 60.0f) + 0.5f);
+    eta_rate_ready = false;
+    eta_soc_rate_per_min = 0.0f;
 }
 else
 {
-    Estimated_Charging_Time = 0; // 暂无有效充电速度，无法估算
+    if (!eta_rate_ready)
+    {
+        eta_rate_ready = true;
+        eta_rate_base_soc = Soc;
+        eta_rate_base_tick = now;
+    }
+
+    float soc_gain = Soc - eta_rate_base_soc;
+    uint32_t elapsed_ms = now - eta_rate_base_tick;
+
+    // SOC 累计上升 0.5 个百分点后，用实际充电速度更新估算
+    if (soc_gain >= 0.5f && elapsed_ms > 0U)
+    {
+        eta_soc_rate_per_min =
+            soc_gain * 60000.0f / (float)elapsed_ms;
+
+        eta_rate_base_soc = Soc;
+        eta_rate_base_tick = now;
+    }
+
+    float minutes;
+
+    if (eta_soc_rate_per_min > 0.0f)
+    {
+        // 根据近期实际 SOC 增长速度估算，能反映功率下降
+        minutes = (100.0f - Soc) / eta_soc_rate_per_min;
+    }
+    else
+    {
+        // 首次收到数据时立即显示，不等待 SOC 累计变化
+        float remaining_wh = Battery_Capacity_Ah * Nominal_Voltage
+                           * (1.0f - Soc / 100.0f);
+        minutes = remaining_wh / PowerReal * 60.0f;
+    }
+
+    Estimated_Charging_Time =
+        (minutes < 1.0f) ? 1U : (uint16_t)(minutes + 0.5f);
 }
-            
+
         buff_upadte(&User_Change_message_date,PowerReal_x10,Per_Minute_Data);
-        for(uint32_t i = 0; i < (Per_Minute_Data ? 30:15); i++)
-        {
-            lv_chart_set_series_value_by_id(Charging_Chart, ser, i, data[i]);
-        }
+        Chart_Update_Start = true;
     }
 }
 

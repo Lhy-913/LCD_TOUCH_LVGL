@@ -32,6 +32,10 @@
 /* USER CODE BEGIN TD */
     volatile uint16_t sleep_time = 0;
     volatile bool lcd_sleep_flag = 0;
+    volatile uint32_t lcd_sleep_Choose = 0;
+    volatile uint32_t lcd_sleep_time = 0;
+
+
 /* USER CODE END TD */
 
 /* Private define ------------------------------------------------------------*/
@@ -254,14 +258,34 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     lv_tick_inc(1);
 
     static uint16_t time_count = 0;
+    
+    switch(lcd_sleep_Choose)
+    {
+        case 0:
+        lcd_sleep_time = 15;
+        break;
+        
+        case 1:
+        lcd_sleep_time = 30;
+        break;
+        
+        case 2:
+        lcd_sleep_time = 60;
+        break;
+        
+        case 3:
+        lcd_sleep_time = 300;
+        break;
+    
+    }
 
     if (++time_count >= 1000)
     {
         time_count = 0;
         sleep_time++;
 
-        if (sleep_time > 6 && sleep_time < 10) LCD_Brightness(30);
-        else if (sleep_time > 50)
+        if (sleep_time > (lcd_sleep_time - 10)&& sleep_time <= lcd_sleep_time) LCD_Brightness(30);
+        else if (sleep_time > lcd_sleep_time)
         {
             lcd_sleep_flag = 1;
             __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, 0);

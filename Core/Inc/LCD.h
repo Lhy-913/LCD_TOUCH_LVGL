@@ -12,7 +12,6 @@
 #define Vertical_choose 1  // 垂直翻转
 
 #define DMA_choose 1       // DMA传输   
-#define DMA2D_choose 1     // DMA2D优化（实测效果提升不大，仅1-2帧的优化）
 
 #define Tear_Reduction 0 /* 撕裂抑制   开启后帧率会下降，因为要判断扫描线能否在特定区域中才启动传输，以此减少读写线重合的概率
                            （停用，持续的检测降低大量性能，而且效果也差）  */

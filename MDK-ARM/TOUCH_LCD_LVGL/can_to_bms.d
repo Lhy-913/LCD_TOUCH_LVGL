@@ -37,8 +37,6 @@ touch_lcd_lvgl\can_to_bms.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_t
 touch_lcd_lvgl\can_to_bms.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h
 touch_lcd_lvgl\can_to_bms.o: ../Core/Inc/usart.h
 touch_lcd_lvgl\can_to_bms.o: ../Core/Inc/main.h
-touch_lcd_lvgl\can_to_bms.o: ../Core/Inc/printf.h
-touch_lcd_lvgl\can_to_bms.o: D:\Keil5_MDK__For_STM32_cubeMX\Core\ARM\ARMCC\Bin\..\include\stdio.h
 touch_lcd_lvgl\can_to_bms.o: D:\Keil5_MDK__For_STM32_cubeMX\Core\ARM\ARMCC\Bin\..\include\string.h
 touch_lcd_lvgl\can_to_bms.o: ../Core/Inc/Lvgl_Array_Update.h
 touch_lcd_lvgl\can_to_bms.o: D:\Keil5_MDK__For_STM32_cubeMX\Core\ARM\ARMCC\Bin\..\include\stdbool.h
@@ -260,6 +258,7 @@ touch_lcd_lvgl\can_to_bms.o: ../user_lvgl/lvgl/include/lvgl/widgets/lv_table.h
 touch_lcd_lvgl\can_to_bms.o: ../user_lvgl/lvgl/include/lvgl/widgets/lv_tabview.h
 touch_lcd_lvgl\can_to_bms.o: ../user_lvgl/lvgl/include/lvgl/widgets/lv_tileview.h
 touch_lcd_lvgl\can_to_bms.o: ../user_lvgl/lvgl/include/lvgl/widgets/lv_win.h
+touch_lcd_lvgl\can_to_bms.o: D:\Keil5_MDK__For_STM32_cubeMX\Core\ARM\ARMCC\Bin\..\include\stdio.h
 touch_lcd_lvgl\can_to_bms.o: ../user_lvgl/lvgl/include/lvgl/api_map/lv_api_map_v8.h
 touch_lcd_lvgl\can_to_bms.o: ../user_lvgl/lvgl/include/lvgl/api_map/lv_api_map_v9_0.h
 touch_lcd_lvgl\can_to_bms.o: ../user_lvgl/lvgl/include/lvgl/api_map/lv_api_map_v9_1.h
